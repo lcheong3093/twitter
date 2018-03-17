@@ -49,11 +49,11 @@ input[type=submit]:hover {
   padding: 10px;
 }
 .login {
-  width: 45%;
+  width: 50%;
   background: powderblue;
   float: left;
 }
 .adduser {
-  margin-left: 45%;
+  margin-left: 50%;
   background: powderblue;
 }

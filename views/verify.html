@@ -1,0 +1,25 @@
+<!DOCTYPE>
+<html>
+    <head>
+		<link rel="stylesheet" href="/stylesheets/style.css">
+	</head>
+	
+	<title>Verify Your Account</title>
+
+	<body>
+		<div>
+			<h1>Please Enter the Verification Code Sent to Your Email</h1>
+			
+			<div>
+                <form action="/verify" method="post">
+					<input type="hidden" name="key" value= <%=key%> ></input>
+					<input type="hidden" name="username" value= <%=username%> ></input>
+					
+                    <input type="text" name="verification" placeholder="Verification Code"></input>
+					<input type="submit" value="Verify"></input>
+				</form>
+			</div>			
+		</div>
+	</body>
+
+</html>
