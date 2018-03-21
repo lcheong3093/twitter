@@ -10,7 +10,7 @@ var rand = require('generate-key');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('signin');
+  res.render('welcome');
 });
 
 /* Create Account */
@@ -73,6 +73,7 @@ router.post('/login', function(req, res){
 
   checkLogin(username, password, function(err, string){
     if(string !== undefined){
+      if(string === "unverified");
       // res.send({status: "error"});
       res.send(string);
     }else{
@@ -174,11 +175,10 @@ function verifyUser(username){
 }
 
 //Check username & password & verification
-function checkLogin(username, password){
+function checkLogin(username, password, callback){
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
 
-    console.log("connect: " + email);
 		var twitter = db.db("twitter");
 		twitter.collection("users").findOne({username: username}, function(err, res) {
       if (err) throw err;
@@ -192,7 +192,7 @@ function checkLogin(username, password){
           callback(err, undefined);
         }
       }else{
-        callback(err, "Can't find user");
+        callback(err, "Can't find user: " + username);
       }
 
       db.close();
