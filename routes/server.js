@@ -42,10 +42,10 @@ router.post('/adduser', function(req, res) {
       // res.send(string);
       res.send({status: "error"});
     }else{
-      var user = {email: email, username: username, password: password, status: "unverified"};
+      var key = rand.generateKey();
+      var user = {email: email, username: username, password: password, status: key};
       addNewUser(user, function(err, email){
-        var key = rand.generateKey();
-        sendVerification(email, key);
+        sendVerification(email, user.status);
         // res.render('verify', {key: key, username: username});
         res.send({status: "OK"});
       });
@@ -56,15 +56,27 @@ router.post('/adduser', function(req, res) {
 
 /* Verify Account */
 router.post('/verify', function(req, res) {
-  console.log("correct key: " + req.body.key + " user key: " + req.body.verification);
-  if(req.body.key !== req.body.verification && req.body.key !== "abracadabra"){
-    // res.render('verifyerror', {key: req.body.key, username: req.body.username});
-    res.send({status: "error"});
-  }else{
-    verifyUser(req.body.username);
-    // res.render('login');
-    res.send({status: "OK"});
-  }
+  var email = req.body.email;
+  var user_key = req.body.key;
+
+  console.log("email: " + email + " key: " + key);
+
+  checkKey(email, key, function(err, string){
+    if(string !== undefined){
+      res.send({status: "error"});
+    }else{
+      res.send({status: "OK"});
+    }
+  });
+  // console.log("correct key: " + req.body.key + " user key: " + req.body.verification);
+  // if(req.body.key !== req.body.verification && req.body.key !== "abracadabra"){
+  //   // res.render('verifyerror', {key: req.body.key, username: req.body.username});
+  //   res.send({status: "error"});
+  // }else{
+  //   verifyUser(req.body.username);
+  //   // res.render('login');
+  //   res.send({status: "OK"});
+  // }
 }); 
 
 /* Log into Account */
@@ -156,6 +168,30 @@ function sendVerification(email, key){
 	transport.sendMail(mailOpts, (err, info) => {
 		if (err) console.log(err); //Handle Error
 		console.log(info);
+  });
+}
+
+//Check if entered key matches emailed key
+function checkKey(email, key, callback){
+  mongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+
+		var twitter = db.db("twitter");
+		twitter.collection("users").findOne({email: email}, function(err, res) {
+      if (err) throw err;
+
+      if(res !== null){
+        if(res.status !== key){
+          callback(err, "incorrect");
+        }else{
+          callback(err, undefined);
+        }
+      }else{
+        callback(err, "nonexistent");
+      }
+
+      db.close();
+    });
   });
 }
 
