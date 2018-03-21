@@ -32,12 +32,16 @@ router.post('/adduser', function(req, res) {
       res.send({status: "error"});
     }else{
       var user = {email: email, username: username, password: password, status: "unverified"};
-      addNewUser(user, function(err, email){
-        var key = rand.generateKey();
-        sendVerification(email, key);
-        // res.render('verify', {key: key, username: username});
-        res.send({status: "OK"});
-      });
+      // addNewUser(user, function(err, email){
+      //   var key = rand.generateKey();
+      //   sendVerification(email, key);
+      //   res.render('verify', {key: key, username: username});
+      //   // res.send({status: "OK"});
+      // });
+
+      var key = rand.generateKey();
+      sendVerification(email, key);
+      res.render('verify', {key: key, username: username});
     }
   });
 
@@ -46,12 +50,12 @@ router.post('/adduser', function(req, res) {
 /* Verify Account */
 router.post('/verify', function(req, res) {
   if(req.body.key !== req.body.verification){
-    // res.render('verifyerror', {key: req.body.key, username: req.body.username});
-    res.send({status: "error"});
+    res.render('verifyerror', {key: req.body.key, username: req.body.username});
+    // res.send({status: "error"});
   }else{
     verifyUser(req.body.username);
-    // res.render('login');
-    res.send({status: "OK"});
+    res.render('login');
+    // res.send({status: "OK"});
   }
 }); 
 
