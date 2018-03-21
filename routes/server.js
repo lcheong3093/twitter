@@ -185,21 +185,14 @@ function checkLogin(username, password){
 
       if(res !== null){
         if(res.password !== password){
-
-        }
-        if(res.email === email){
-          var string = "Email already exists: " + res.email;
-          console.log(string);
-          callback(err, string);
-          db.close();
-        }else if(res.username === username){
-          var string = "Username already exists: " + res.username;
-          console.log(string);
-          callback(err, string);
-          db.close();
+          callback(err, "Incorrect password");
+        }else if(res.status !== "verified"){
+          callback(err, "Please verify your account");
+        }else{
+          callback(err, undefined);
         }
       }else{
-        callback(err, undefined);
+        callback(err, "Can't find user");
       }
 
       db.close();
