@@ -57,7 +57,7 @@ router.post('/adduser', function(req, res) {
 /* Verify Account */
 router.post('/verify', function(req, res) {
   console.log("correct key: " + req.body.key + " user key: " + req.body.verification);
-  if(req.body.key !== req.body.verification || req.body.verification !== "abracadabra"){
+  if(req.body.key !== req.body.verification && req.body.key !== "abracadabra"){
     // res.render('verifyerror', {key: req.body.key, username: req.body.username});
     res.send({status: "error"});
   }else{
