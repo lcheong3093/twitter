@@ -10,7 +10,7 @@ var rand = require('generate-key');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('welcome');
+  res.render('signin');
 });
 
 /* Create Account */
@@ -185,7 +185,7 @@ function checkLogin(username, password){
 
       if(res !== null){
         if(res.password !== password){
-          
+
         }
         if(res.email === email){
           var string = "Email already exists: " + res.email;
