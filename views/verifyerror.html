@@ -1,24 +1,37 @@
-<!DOCTYPE>
-<html>
-    <head>
-		<link rel="stylesheet" href="/css/style.css">
-	</head>
-	
-	<title>Verify Your Account</title>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="verify error page for Twitter">
+    <meta name="author" content="Calvin Li / Lauren Cheong">
+    <link rel="icon" href="/favicon.ico">
+    <title>Twitter - Verify Your Account</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- custom css, if we need it -->
+    <!-- <link href="signin.css" rel="stylesheet"> -->
+  </head>
+  <body>
 
-	<body>
-		<div>
-			<h1>Please Enter the Verification Code Sent to Your Email</h1>
-			<h2>Incorrect Key. Please try again.</h2>
-			<div>
-                <form action="/verify" method="post">
-					<input type="hidden" name="key" value= <%=key%> ></input>
-					
-                    <input type="text" name="verification" placeholder="Verification Code"></input>
-					<input type="submit" value="Verify"></input>
-				</form>
-			</div>			
-		</div>
-	</body>
+    <div class="container">
+      <h1>Please Enter the Verification Code Sent to Your Email</h1>
+	  <h2>Incorrect Key. Please try again.</h2>
+      <form class="form-group" action="/verify" method="post">
+        <label for="inputKey" class="sr-only">Key</label>
+        <input type="hidden" name="key" id="inputKey" class="form-control" placeholder="key" value = <%=key%>>
+        <label for="inputVerify" class="sr-only">Verification</label>
+        <input type="text" name="verification" id="inputVerify" class="form-control" placeholder="Verification code" required autofocus>
+        <button class="btn btn-lg btn-primary btn-block" type="submit" value="Verify">Create new account</button>
+      </form>
 
+    </div> 
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <!-- <script src="/js/popper.min.js"></script> -->
+    <script src="/js/bootstrap.min.js"></script>
+  </body>
 </html>
