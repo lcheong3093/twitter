@@ -19,6 +19,17 @@ router.post('/adduser', function(req, res) {
   var email = req.body.email.toLowerCase();
   var password = req.body.password;
 
+  if(username == ""){
+    res.send("Please enter a username");
+    //res.send({status: "error"});
+  }else if(email == ""){
+    res.send("Please enter an email");
+    //res.send({status: "error"});
+  }else if(password == ""){
+    res.send("Please enter a password");
+    //res.send({status: "error"});
+  }
+
   console.log("User: " + username + " Email: " + email + " Pass: " + password);
 
   checkInfo(email, username, function(err, string){
@@ -28,20 +39,16 @@ router.post('/adduser', function(req, res) {
     }
 
     if(string !== undefined){
-      // res.send(string);
-      res.send({status: "error"});
+      res.send(string);
+      // res.send({status: "error"});
     }else{
       var user = {email: email, username: username, password: password, status: "unverified"};
-      // addNewUser(user, function(err, email){
-      //   var key = rand.generateKey();
-      //   sendVerification(email, key);
-      //   res.render('verify', {key: key, username: username});
-      //   // res.send({status: "OK"});
-      // });
-
-      var key = rand.generateKey();
-      sendVerification(email, key);
-      res.render('verify', {key: key, username: username});
+      addNewUser(user, function(err, email){
+        var key = rand.generateKey();
+        sendVerification(email, key);
+        res.render('verify', {key: key, username: username});
+        // res.send({status: "OK"});
+      });
     }
   });
 
@@ -59,11 +66,27 @@ router.post('/verify', function(req, res) {
   }
 }); 
 
+/* Log into Account */
+router.post('/login', function(req, res){
+  var username = req.body.username;
+  var password = req.body.password;
+
+  checkLogin(username, password, function(err, string){
+    if(string !== undefined){
+      // res.send({status: "error"});
+      res.send(string);
+    }else{
+      res.send({status: "OK"});
+      //RENDER FEED
+    }
+  });
+});
+
 /*** HELPERS ***/
 
 //Check for unique email & username
 function checkInfo(email, username, callback){
-  console.log("checkEmail: " + email);
+  // console.log("checkEmail: " + email);
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
 
@@ -148,6 +171,40 @@ function verifyUser(username){
 			db.close();
 		});
 	});
+}
+
+//Check username & password & verification
+function checkLogin(username, password){
+  mongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+
+    console.log("connect: " + email);
+		var twitter = db.db("twitter");
+		twitter.collection("users").findOne({username: username}, function(err, res) {
+      if (err) throw err;
+
+      if(res !== null){
+        if(res.password !== password){
+          
+        }
+        if(res.email === email){
+          var string = "Email already exists: " + res.email;
+          console.log(string);
+          callback(err, string);
+          db.close();
+        }else if(res.username === username){
+          var string = "Username already exists: " + res.username;
+          console.log(string);
+          callback(err, string);
+          db.close();
+        }
+      }else{
+        callback(err, undefined);
+      }
+
+      db.close();
+    });
+  });
 }
 
 module.exports = router;
