@@ -20,14 +20,14 @@ router.post('/adduser', function(req, res) {
   var password = req.body.password;
 
   if(username == ""){
-    res.send("Please enter a username");
-    //res.send({status: "error"});
+    // res.send("Please enter a username");
+    res.send({status: "error"});
   }else if(email == ""){
-    res.send("Please enter an email");
-    //res.send({status: "error"});
+    // res.send("Please enter an email");
+    res.send({status: "error"});
   }else if(password == ""){
-    res.send("Please enter a password");
-    //res.send({status: "error"});
+    // res.send("Please enter a password");
+    res.send({status: "error"});
   }
 
   console.log("User: " + username + " Email: " + email + " Pass: " + password);
@@ -35,19 +35,19 @@ router.post('/adduser', function(req, res) {
   checkInfo(email, username, function(err, string){
     if(err){ 
       throw err;
-      // res.send({status: "error"});
+      res.send({status: "error"});
     }
 
     if(string !== undefined){
-      res.send(string);
-      // res.send({status: "error"});
+      // res.send(string);
+      res.send({status: "error"});
     }else{
       var user = {email: email, username: username, password: password, status: "unverified"};
       addNewUser(user, function(err, email){
         var key = rand.generateKey();
         sendVerification(email, key);
-        res.render('verify', {key: key, username: username});
-        // res.send({status: "OK"});
+        // res.render('verify', {key: key, username: username});
+        res.send({status: "OK"});
       });
     }
   });
@@ -57,12 +57,12 @@ router.post('/adduser', function(req, res) {
 /* Verify Account */
 router.post('/verify', function(req, res) {
   if(req.body.key !== req.body.verification){
-    res.render('verifyerror', {key: req.body.key, username: req.body.username});
-    // res.send({status: "error"});
+    // res.render('verifyerror', {key: req.body.key, username: req.body.username});
+    res.send({status: "error"});
   }else{
     verifyUser(req.body.username);
-    res.render('login');
-    // res.send({status: "OK"});
+    // res.render('login');
+    res.send({status: "OK"});
   }
 }); 
 
@@ -74,8 +74,8 @@ router.post('/login', function(req, res){
   checkLogin(username, password, function(err, string){
     if(string !== undefined){
       if(string === "unverified");
-      // res.send({status: "error"});
-      res.send(string);
+      res.send({status: "error"});
+      // res.send(string);
     }else{
       res.send({status: "OK"});
       //RENDER FEED
@@ -133,7 +133,7 @@ function addNewUser(user, callback){
 
 //Send verification email w/ key
 function sendVerification(email, key){
-  var message = "validation key: " + key;
+  var message = "validation key: <" + key + ">";
 
   const transport = nodemailer.createTransport({
 		host: 'smtp.gmail.com',
@@ -185,14 +185,14 @@ function checkLogin(username, password, callback){
 
       if(res !== null){
         if(res.password !== password){
-          callback(err, "Incorrect password");
-        }else if(res.status !== "verified"){
-          callback(err, "Please verify your account");
+          callback(err, "incorrect");
+        }else if(res.status === "unverified"){
+          callback(err, "unverified");
         }else{
           callback(err, undefined);
         }
       }else{
-        callback(err, "Can't find user: " + username);
+        callback(err, "undefined");
       }
 
       db.close();
