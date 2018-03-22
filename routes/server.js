@@ -86,8 +86,9 @@ router.post('/login', function(req, res){
 
   checkLogin(username, password, function(err, string){
     if(string !== undefined){
-      if(string === "unverified");
-      res.send({status: "error"});
+      if(string !== "verified" || string !== "active" || string !== "inactive"){
+        res.send({status: "error"});
+      }
       // res.send(string);
     }else{
       res.send({status: "OK"});
