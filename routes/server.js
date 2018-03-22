@@ -45,6 +45,7 @@ router.post('/adduser', function(req, res) {
       var key = rand.generateKey();
       var user = {email: email, username: username, password: password, status: key};
       addNewUser(user, function(err, email){
+        console.log("key: " + user.status);
         sendVerification(email, user.status);
         // res.render('verify', {key: key, username: username});
         res.send({status: "OK"});
