@@ -81,7 +81,7 @@ router.post('/verify', function(req, res) {
 
 /* Log into Account */
 router.post('/login', function(req, res){
-  var username = req.body.username;
+  var username = req.body.username.toLowerCase();
   var password = req.body.password;
 
   checkLogin(username, password, function(err, string){
