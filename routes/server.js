@@ -65,6 +65,7 @@ router.post('/verify', function(req, res) {
     if(string !== undefined){
       res.send({status: "error"});
     }else{
+      verifyUser(email);
       res.send({status: "OK"});
     }
   });
@@ -176,7 +177,7 @@ function sendVerification(email, key){
   
 	transport.sendMail(mailOpts, (err, info) => {
 		if (err) console.log(err); //Handle Error
-		console.log(info);
+		// console.log(info);
   });
 }
 
@@ -205,13 +206,13 @@ function checkKey(email, key, callback){
 }
 
 //Update user's status to verified
-function verifyUser(username){
+function verifyUser(email){
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;		
     
     var twitter = db.db("twitter");
     var newvalues = { $set: { status: "verified" } };
-		twitter.collection("users").updateOne({username: username}, newvalues, function(err, res) {
+		twitter.collection("users").updateOne({email: email}, newvalues, function(err, res) {
       if (err) throw err;
       
       console.log("Verified user and updated db: ", username);
@@ -230,6 +231,7 @@ function checkLogin(username, password, callback){
       if (err) throw err;
 
       if(res !== null){
+        console.log("RESULT: ", res);
         var status = res.status;
         if(res.password !== password){
           callback(err, "incorrect");
