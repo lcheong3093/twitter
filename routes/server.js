@@ -230,7 +230,7 @@ function checkLogin(username, password, callback){
       if (err) throw err;
 
       if(res !== null){
-        console.log("checklogin res status:", res.status);
+        var status = res.status;
         if(res.password !== password){
           callback(err, "incorrect");
         }else if(status !== "verified" || status !== "active" || status !== "inactive"){
