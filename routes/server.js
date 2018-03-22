@@ -216,7 +216,7 @@ function verifyUser(email){
 		twitter.collection("users").updateOne({email: email}, newvalues, function(err, res) {
       if (err) throw err;
       
-      console.log("Verified user and updated db: ", username);
+      console.log("Verified user and updated db: ", email);
 			db.close();
 		});
 	});
