@@ -56,7 +56,7 @@ router.post('/adduser', function(req, res) {
 
 /* Verify Account */
 router.post('/verify', function(req, res) {
-  var email = req.body.email;
+  var email = req.body.email.toLowerCase();
   var user_key = req.body.key;
 
   console.log("email: " + email + " key: " + user_key);
