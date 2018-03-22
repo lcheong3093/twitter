@@ -177,7 +177,7 @@ function sendVerification(email, key){
   
 	transport.sendMail(mailOpts, (err, info) => {
 		if (err) console.log(err); //Handle Error
-		console.log("sent email");
+		console.log(info);
   });
 }
 
