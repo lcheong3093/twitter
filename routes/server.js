@@ -60,9 +60,9 @@ router.post('/verify', function(req, res) {
   var email = req.body.email;
   var user_key = req.body.key;
 
-  console.log("email: " + email + " key: " + key);
+  console.log("email: " + email + " key: " + user_key);
 
-  checkKey(email, key, function(err, string){
+  checkKey(email, user_key, function(err, string){
     if(string !== undefined){
       res.send({status: "error"});
     }else{
