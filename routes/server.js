@@ -56,7 +56,6 @@ router.post('/adduser', function(req, res) {
 
 /* Verify Account */
 router.post('/verify', function(req, res) {
-  console.log("body:", req.body);
   var email = req.body.email;
   var user_key = req.body.key;
 
@@ -180,7 +179,7 @@ function checkKey(email, key, callback){
 		var twitter = db.db("twitter");
 		twitter.collection("users").findOne({email: email}, function(err, res) {
       if (err) throw err;
-
+      console.log("checkKey res: ", res);
       if(res !== null){
         if(res.status !== key){
           callback(err, "incorrect");
