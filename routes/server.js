@@ -86,7 +86,15 @@ router.post('/login', function(req, res){
 
   checkLogin(username, password, function(err, string){
     if(string !== undefined){
-      if(string !== "verified" || string !== "active" || string !== "inactive"){
+      console.log("login string:", string);
+      if(string === "unverified"){
+        console.log("account unverified");
+        res.send({status: "error"});
+      }else if(string === "incorrect:"){
+        console.log("incorrect password");
+        res.send({status: "error"});
+      }else if(string === "nonexistent"){
+        console.log("user does not exist");
         res.send({status: "error"});
       }
       // res.send(string);
@@ -222,9 +230,10 @@ function checkLogin(username, password, callback){
       if (err) throw err;
 
       if(res !== null){
+        console.log("checklogin res status:", res.status);
         if(res.password !== password){
           callback(err, "incorrect");
-        }else if(res.status === "unverified"){
+        }else if(status !== "verified" || status !== "active" || status !== "inactive"){
           callback(err, "unverified");
         }else{
           callback(err, undefined);
