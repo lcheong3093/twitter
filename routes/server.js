@@ -236,7 +236,7 @@ function checkLogin(username, password, callback){
         var status = res.status;
         if(res.password !== password){
           callback(err, "incorrect");
-        }else if(status !== "verified" || status !== "active" || status !== "inactive"){
+        }else if(status !== "verified" && status !== "active" && status !== "inactive"){
           callback(err, "unverified");
         }else{
           callback(err, undefined);
