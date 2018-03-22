@@ -164,8 +164,8 @@ function sendVerification(email, key){
 		port: 465,
 		secure: true,
 		auth: {
-		  user: 'twittercloud356@gmail.com',
-		  pass: 'twoCOMESafterONE'
+		  user: 'tttcse356@gmail.com',
+		  pass: '2COMESafter1'
 		}
   });
   
