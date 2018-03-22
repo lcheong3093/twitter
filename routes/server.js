@@ -93,7 +93,7 @@ router.post('/login', function(req, res){
       }else if(string === "incorrect:"){
         console.log("incorrect password");
         res.send({status: "error"});
-      }else if(string === "nonexistent"){
+      }else if(string === "null"){
         console.log("user does not exist");
         res.send({status: "error"});
       }
@@ -239,7 +239,7 @@ function checkLogin(username, password, callback){
           callback(err, undefined);
         }
       }else{
-        callback(err, "undefined");
+        callback(err, "null");
       }
 
       db.close();
