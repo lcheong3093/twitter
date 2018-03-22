@@ -15,8 +15,8 @@ router.get('/', function(req, res, next) {
 
 /* Create Account */
 router.post('/adduser', function(req, res) {
-  var username = req.body.username.toLowerCase();
-  var email = req.body.email.toLowerCase();
+  var username = req.body.username;
+  var email = req.body.email;
   var password = req.body.password;
 
   if(username == ""){
@@ -56,7 +56,7 @@ router.post('/adduser', function(req, res) {
 
 /* Verify Account */
 router.post('/verify', function(req, res) {
-  var email = req.body.email.toLowerCase();
+  var email = req.body.email;
   var user_key = req.body.key;
 
   console.log("email: " + email + " key: " + user_key);
@@ -82,7 +82,7 @@ router.post('/verify', function(req, res) {
 
 /* Log into Account */
 router.post('/login', function(req, res){
-  var username = req.body.username.toLowerCase();
+  var username = req.body.username;
   var password = req.body.password;
 
   checkLogin(username, password, function(err, string){
