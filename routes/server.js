@@ -1,10 +1,8 @@
 var express = require('express');
 var router = express.Router();
-
 var mongo = require('mongodb');
 var mongoClient = mongo.MongoClient;
 var url = "mongodb://localhost"
-
 var nodemailer = require('nodemailer');
 var rand = require('generate-key');
 
@@ -29,19 +27,16 @@ router.post('/adduser', function(req, res) {
     // res.send("Please enter a password");
     res.send({status: "error"});
   }
-
   console.log("User: " + username + " Email: " + email + " Pass: " + password);
-
   checkInfo(email, username, function(err, string){
     if(err){ 
       throw err;
       res.send({status: "error"});
     }
-
-    if(string !== undefined){
+    if(string !== undefined) {
       // res.send(string);
       res.send({status: "error"});
-    }else{
+    } else {
       var key = rand.generateKey();
       var user = {email: email, username: username, password: password, status: key};
       addNewUser(user, function(err, email){
@@ -52,7 +47,6 @@ router.post('/adduser', function(req, res) {
       });
     }
   });
-
 });
 
 /* Verify Account */
@@ -70,15 +64,6 @@ router.post('/verify', function(req, res) {
       res.send({status: "OK"});
     }
   });
-  // console.log("correct key: " + req.body.key + " user key: " + req.body.verification);
-  // if(req.body.key !== req.body.verification && req.body.key !== "abracadabra"){
-  //   // res.render('verifyerror', {key: req.body.key, username: req.body.username});
-  //   res.send({status: "error"});
-  // }else{
-  //   verifyUser(req.body.username);
-  //   // res.render('login');
-  //   res.send({status: "OK"});
-  // }
 }); 
 
 /* Log into Account */
@@ -109,12 +94,27 @@ router.post('/login', function(req, res){
 
 /* Log out of Account */
 router.post('/logout', function(req, res){
-  //if user is not logged in, return status: "error"
-  res.send({status: "OK"});
+    //if user is not logged in, return status: "error"
+    res.send({status: "OK"});
 });
 
-/*** HELPERS ***/
+/* Add Item */
+router.post('/additem', function(req, res){
+    //Post a new item
+    //Only allowed if logged in
+    res.send({status: "OK"});
+});
 
+/* Get Item by ID */
+router.post('/item/:id', function(req, res){
+    //Get contents of a single item given an ID
+    res.send({status: "OK"});
+});
+      
+
+
+
+/*** HELPERS ***/
 //Check for unique email & username
 function checkInfo(email, username, callback){
   // console.log("checkEmail: " + email);
@@ -164,7 +164,6 @@ function addNewUser(user, callback){
 //Send verification email w/ key
 function sendVerification(email, key){
   var message = "validation key: <" + key + ">";
-
   const transport = nodemailer.createTransport({
 		host: 'smtp.gmail.com',
 		port: 465,
@@ -174,15 +173,13 @@ function sendVerification(email, key){
 		  pass: '2COMESafter1'
 		}
   });
-  
-	var mailOpts = {
+  var mailOpts = {
         from: 'user@gmail.com',
         to: email,
         subject: 'Verify your account',
         text: message
   };
-  
-	transport.sendMail(mailOpts, (err, info) => {
+  transport.sendMail(mailOpts, (err, info) => {
 		if (err) console.log(err); //Handle Error
 		console.log(info);
   });
@@ -192,9 +189,8 @@ function sendVerification(email, key){
 function checkKey(email, key, callback){
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
-
-		var twitter = db.db("twitter");
-		twitter.collection("users").findOne({email: email}, function(err, res) {
+	  var twitter = db.db("twitter");
+	  twitter.collection("users").findOne({email: email}, function(err, res) {
       if (err) throw err;
       console.log("checkKey res: ", res);
       if(res !== null){
@@ -206,7 +202,6 @@ function checkKey(email, key, callback){
       }else{
         callback(err, "nonexistent");
       }
-
       db.close();
     });
   });
@@ -215,28 +210,24 @@ function checkKey(email, key, callback){
 //Update user's status to verified
 function verifyUser(email){
   mongoClient.connect(url, function(err, db) {
-    if (err) throw err;		
-    
+    if (err) throw err;		 
     var twitter = db.db("twitter");
     var newvalues = { $set: { status: "verified" } };
-		twitter.collection("users").updateOne({email: email}, newvalues, function(err, res) {
+	  twitter.collection("users").updateOne({email: email}, newvalues, function(err, res) {
       if (err) throw err;
-      
       console.log("Verified user and updated db: ", email);
-			db.close();
-		});
-	});
+        db.close();
+      });
+  });
 }
 
 //Check username & password & verification
 function checkLogin(username, password, callback){
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
-
-		var twitter = db.db("twitter");
-		twitter.collection("users").findOne({username: username}, function(err, res) {
+	  var twitter = db.db("twitter");
+	  twitter.collection("users").findOne({username: username}, function(err, res) {
       if (err) throw err;
-
       if(res !== null){
         console.log("RESULT: ", res);
         var status = res.status;
@@ -250,7 +241,6 @@ function checkLogin(username, password, callback){
       }else{
         callback(err, "null");
       }
-
       db.close();
     });
   });
