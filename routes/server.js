@@ -199,8 +199,8 @@ function addNewItem(item, callback){
 		var twitter = db.db("twitter");
 		twitter.collection("items").insertOne(item, function(err, res) {
 			if (err) throw err;
-      console.log("New item added to database: ", item);
-      callback(err, res.id);
+      console.log("New item added to database: ", res._id);
+      callback(err, res._id);
 			db.close();
 		});
 	});
