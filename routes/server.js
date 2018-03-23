@@ -125,14 +125,17 @@ router.post('/additem', function(req, res){
 
   console.log("content: " + content + " childType: " + childType);
   /*
-    check if logged in
+    check if logged in using session cookie
   */
-
-  var item = {content: content, childType: childType};
+  var timestamp = new Date().toISOString();
+  var item = {content: content, username: "sldkfj", property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
+  
   addNewItem(item, function(err, id){
     // res.render('verify', {key: key, username: username});
-    res.send({status: "OK"});
+    console.log("id returned: " + id);
+    res.send({status: "OK", id: id});
   });
+
 });
 
 /* Get Item by ID */
@@ -197,10 +200,10 @@ function addNewItem(item, callback){
   mongoClient.connect(url, function(err, db) {
 		if (err) throw err;		
 		var twitter = db.db("twitter");
-		twitter.collection("items").insertOne(item, function(err, res) {
-			if (err) throw err;
-      console.log("New item added to database: ", res._id);
-      callback(err, res._id);
+		twitter.collection("items").insert(item, function(err, res) {
+      if (err) throw err;
+      console.log("New item added to database: ", res.insertedIds[0]);
+      callback(err, res.insertedIds[0]);
 			db.close();
 		});
 	});
