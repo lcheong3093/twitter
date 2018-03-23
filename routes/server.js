@@ -86,6 +86,17 @@ router.post('/login', function(req, res){
       }
       // res.send(string);
     }else{
+      mongoClient.connect(url, function(err, db) {
+        if (err) throw err;		 
+        var twitter = db.db("twitter");
+        var newvalues = { $set: { status: "active" } };
+        twitter.collection("users").updateOne({username: username}, newvalues, function(err, res) {
+          if (err) throw err;
+          console.log("User logged in and updated db: ", username);
+            db.close();
+          });
+      });
+
       res.send({status: "OK"});
       //RENDER FEED
     }
@@ -112,7 +123,7 @@ router.post('/additem', function(req, res){
   /*
     check if logged in
   */
-  var key = rand.generateKey();
+
   var item = {content: content, childType: childType};
   addNewItem(item, function(err, asdfaasdfdf){
     // res.render('verify', {key: key, username: username});
