@@ -92,7 +92,7 @@ router.post('/login', function(req, res){
       if(string === "unverified"){
         console.log("account unverified");
         res.send({status: "error"});
-      }else if(string === "incorrect:"){
+      }else if(string === "incorrect"){
         console.log("incorrect password");
         res.send({status: "error"});
       }else if(string === "null"){
