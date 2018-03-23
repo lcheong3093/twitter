@@ -107,6 +107,12 @@ router.post('/login', function(req, res){
   });
 });
 
+/* Log out of Account */
+router.post('/logout', function(req, res){
+  //if user is not logged in, return status: "error"
+  res.send({status: "OK"});
+});
+
 /*** HELPERS ***/
 
 //Check for unique email & username
