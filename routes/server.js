@@ -100,9 +100,24 @@ router.post('/logout', function(req, res){
 
 /* Add Item */
 router.post('/additem', function(req, res){
-    //Post a new item
-    //Only allowed if logged in
+  //Post a new item
+  //Only allowed if logged in
+  var content = req.body.content;
+  var childType = req.body.childType;
+  /* 
+    error-checking for content/childtype
+  */
+
+  console.log("content: " + content + " childType: " + childType);
+  /*
+    check if logged in
+  */
+  var key = rand.generateKey();
+  var item = {content: content, childType: childType};
+  addNewItem(item, function(err, asdfaasdfdf){
+    // res.render('verify', {key: key, username: username});
     res.send({status: "OK"});
+  });
 });
 
 /* Get Item by ID */
@@ -156,6 +171,20 @@ function addNewUser(user, callback){
 			if (err) throw err;
       console.log("New user added to database: ", user);
       callback(err, user.email);
+			db.close();
+		});
+	});
+}
+
+//Add user to database
+function addNewItem(item, callback){
+  mongoClient.connect(url, function(err, db) {
+		if (err) throw err;		
+		var twitter = db.db("twitter");
+		twitter.collection("items").insertOne(item, function(err, res) {
+			if (err) throw err;
+      console.log("New item added to database: ", item);
+      callback(err, item);
 			db.close();
 		});
 	});
