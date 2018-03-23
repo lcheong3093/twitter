@@ -145,7 +145,21 @@ router.get('/item/:id', function(req, res){
     res.send({status: "OK"});
 });
       
-
+/* Search for items by timestamp */
+router.post('/search', function(req, res){
+  //Gets a list of the latest <limit> number of items prior to (and including) the provided <timestamp>
+  var timestamp = req.body.timestamp;
+  var limit = 0;
+  if (req.body.limit === undefined || req.body.limit === null) {
+    limit = 25; // default
+  } else {
+    limit = req.body.limit;
+  }
+  searchByTimestamp(timestamp, limit, function(err, items){
+    res.send({status: "OK", items: items}); // items is an array of item objects
+    // res.send({status:"error"});
+  });
+});
 
 
 /*** HELPERS ***/
@@ -310,6 +324,21 @@ function getStatus(username, callback){
       db.close();
     });
   });
+}
+
+// Search for <limit> newest number of items from <timestamp> and return the array of items
+function searchByTimestamp(timestamp, limit, callback){
+  mongoClient.connect(url, function(err, db) {
+		if (err) throw err;		
+    var twitter = db.db("twitter");
+    var options = {"limit":20};
+		twitter.collection("items").find({"timestamp":{$gte:100}}, options).toArray(function(err, items_found) {
+			if (err) throw err;
+      console.log("items found: ", items_found);
+      callback(err, items_found);
+			db.close();
+		});
+	});
 }
 
 module.exports = router;
