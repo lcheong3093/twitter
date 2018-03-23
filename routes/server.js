@@ -121,8 +121,9 @@ router.post('/additem', function(req, res){
 });
 
 /* Get Item by ID */
-router.post('/item/:id', function(req, res){
+router.get('/item/:id', function(req, res){
     //Get contents of a single item given an ID
+    console.log("testsing: " + req.params.id);
     res.send({status: "OK"});
 });
       
