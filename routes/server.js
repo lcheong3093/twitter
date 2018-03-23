@@ -5,6 +5,7 @@ var mongoClient = mongo.MongoClient;
 var url = "mongodb://localhost"
 var nodemailer = require('nodemailer');
 var rand = require('generate-key');
+var cookieSession = require('cookie-session');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -86,6 +87,7 @@ router.post('/login', function(req, res){
       }
       // res.send(string);
     }else{
+      //Update status of user
       mongoClient.connect(url, function(err, db) {
         if (err) throw err;		 
         var twitter = db.db("twitter");
@@ -96,6 +98,8 @@ router.post('/login', function(req, res){
             db.close();
           });
       });
+
+      //SESSION COOKIE
 
       res.send({status: "OK"});
       //RENDER FEED
@@ -125,7 +129,7 @@ router.post('/additem', function(req, res){
   */
 
   var item = {content: content, childType: childType};
-  addNewItem(item, function(err, asdfaasdfdf){
+  addNewItem(item, function(err, id){
     // res.render('verify', {key: key, username: username});
     res.send({status: "OK"});
   });
@@ -196,7 +200,7 @@ function addNewItem(item, callback){
 		twitter.collection("items").insertOne(item, function(err, res) {
 			if (err) throw err;
       console.log("New item added to database: ", item);
-      callback(err, item);
+      callback(err, res.id);
 			db.close();
 		});
 	});
@@ -279,6 +283,24 @@ function checkLogin(username, password, callback){
         }else{
           callback(err, undefined);
         }
+      }else{
+        callback(err, "null");
+      }
+      db.close();
+    });
+  });
+}
+
+function getStatus(username, callback){
+  mongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+	  var twitter = db.db("twitter");
+	  twitter.collection("users").findOne({username: username}, function(err, res) {
+      if (err) throw err;
+      if(res !== null){
+        console.log("RESULT: ", res);
+        var status = res.status;
+        callback(err, status);
       }else{
         callback(err, "null");
       }
