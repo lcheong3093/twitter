@@ -21,7 +21,7 @@ router.get('/', function(req, res, next) {
 
 /* Create Account */
 router.post('/adduser', function(req, res) {
-  req.session.id = "test";
+  req.session.asdftesting = "test";
   var username = req.body.username;
   var email = req.body.email;
   var password = req.body.password;
@@ -60,7 +60,7 @@ router.post('/adduser', function(req, res) {
 
 /* Verify Account */
 router.post('/verify', function(req, res) {
-  console.log("test session: following hypen should be test- ", req.session.id);
+  console.log("test session: following hypen should be test- ", req.session.asdftesting);
   var email = req.body.email;
   var user_key = req.body.key;
 
