@@ -8,7 +8,9 @@ var rand = require('generate-key');
 var session = require('express-session')
 
 router.use(session({
-  secret: 'foo',
+  secret: 'foo',  
+  resave: false,
+  saveUninitialized: false
 }));
 
 /* GET home page. */
