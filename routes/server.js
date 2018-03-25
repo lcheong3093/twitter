@@ -373,7 +373,7 @@ function searchByTimestamp(timestamp, limit, callback){
   mongoClient.connect(url, function(err, db) {
 		if (err) throw err;		
     var twitter = db.db("twitter");
-    var options = {"limit":20};
+    var options = {"limit":limit};
 		twitter.collection("items").find({"timestamp":{$gte:100}}, options).toArray(function(err, items_found) {
 			if (err) throw err;
       console.log("items found: ", items_found);
