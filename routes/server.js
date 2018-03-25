@@ -319,7 +319,7 @@ function checkLogin(username, password, callback){
 	  twitter.collection("users").findOne({username: username}, function(err, res) {
       if (err) throw err;
       if(res !== null){
-        console.log("RESULT: ", res);
+        console.log("RESULT: ", res._id);
         var status = res.status;
         if(res.password !== password){
           callback(err, "incorrect");
