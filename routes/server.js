@@ -343,7 +343,7 @@ function getStatus(username, callback){
 	  twitter.collection("users").findOne({username: username}, function(err, res) {
       if (err) throw err;
       if(res !== null){
-        console.log("RESULT: ", res);
+        console.log("RESULT: ", res._id);
         var status = res.status;
         callback(err, status);
       }else{
