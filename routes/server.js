@@ -159,7 +159,19 @@ router.post('/additem', function(req, res){
 /* Get Item by ID */
 router.get('/item/:id', function(req, res){
     //Get contents of a single item given an ID
-    console.log("req.params.id: " + req.params.id);
+    var id = req.params.id;
+    console.log("req.params.id: " + id);
+
+    getItem(id, function(err, item){
+      if(item === null){
+        console.log("could not find item");
+        res.send({status: "error"});
+      }else{
+        console.log("item found: ", item);
+        res.send({status: "OK", item: item});
+      }
+    });
+
     res.send({status: "OK"});
 });
       
@@ -339,6 +351,18 @@ function getStatus(username, callback){
       }else{
         callback(err, "null");
       }
+      db.close();
+    });
+  });
+}
+
+function getItem(id, callback){
+  mongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+	  var twitter = db.db("twitter");
+	  twitter.collection("items").findOne({_id: id}, function(err, res) {
+      if (err) throw err;
+      callback(err, res);
       db.close();
     });
   });
