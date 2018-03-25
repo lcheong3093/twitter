@@ -171,8 +171,6 @@ router.get('/item/:id', function(req, res){
         res.send({status: "OK", item: item});
       }
     });
-
-    res.send({status: "OK"});
 });
       
 /* Search for items by timestamp */
