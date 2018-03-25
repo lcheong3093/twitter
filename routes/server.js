@@ -21,7 +21,6 @@ router.get('/', function(req, res, next) {
 
 /* Create Account */
 router.post('/adduser', function(req, res) {
-  req.session.id = "test";
   var username = req.body.username;
   var email = req.body.email;
   var password = req.body.password;
@@ -109,7 +108,7 @@ router.post('/login', function(req, res){
       });
 
       //SESSION COOKIE
-
+      res.session.username = username;
       res.send({status: "OK"});
       //RENDER FEED
     }
@@ -126,24 +125,33 @@ router.post('/logout', function(req, res){
 router.post('/additem', function(req, res){
   //Post a new item
   //Only allowed if logged in
-  var content = req.body.content;
-  var childType = req.body.childType;
-  /* 
-    error-checking for content/childtype
-  */
 
-  console.log("content: " + content + " childType: " + childType);
-  /*
-    check if logged in using session cookie
-  */
-  var timestamp = new Date().toISOString();
-  var item = {content: content, username: "sldkfj", property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
+  var username = req.session.username;
+
+  if(username === undefined){
+    console.log("no user is logged in");
+    res.send({status: "error"});
+  }else{
+    var content = req.body.content;
+    var childType = req.body.childType;
+    /* 
+      error-checking for content/childtype
+    */
+
+    console.log("content: " + content + " childType: " + childType);
+    /*
+      check if logged in using session cookie
+    */
+    var timestamp = new Date().toISOString();
+    var item = {username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
+    
+    addNewItem(item, function(err, id){
+      // res.render('verify', {key: key, username: username});
+      console.log("id returned: " + id);
+      res.send({status: "OK", id: id});
+    });
+  }
   
-  addNewItem(item, function(err, id){
-    // res.render('verify', {key: key, username: username});
-    console.log("id returned: " + id);
-    res.send({status: "OK", id: id});
-  });
 
 });
 
