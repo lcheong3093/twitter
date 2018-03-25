@@ -21,6 +21,7 @@ router.get('/', function(req, res, next) {
 
 /* Create Account */
 router.post('/adduser', function(req, res) {
+  req.session.id = "test";
   var username = req.body.username;
   var email = req.body.email;
   var password = req.body.password;
@@ -108,7 +109,7 @@ router.post('/login', function(req, res){
       });
 
       //SESSION COOKIE
-      res.session.username = username;
+
       res.send({status: "OK"});
       //RENDER FEED
     }
@@ -125,14 +126,6 @@ router.post('/logout', function(req, res){
 router.post('/additem', function(req, res){
   //Post a new item
   //Only allowed if logged in
-  var user = req.session.username;
-
-  if(user === undefined){
-    console.log("no current user");
-  }else{
-    console.log("current user: " + user);
-  }
-
   var content = req.body.content;
   var childType = req.body.childType;
   /* 
