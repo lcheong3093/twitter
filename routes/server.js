@@ -113,7 +113,7 @@ router.post('/login', function(req, res){
 
       //SESSION COOKIE
       if (username !== undefined)
-        res.session.username = username;
+        req.session.username = username;
       res.send({status: "OK"});
       //RENDER FEED
     }
@@ -123,7 +123,7 @@ router.post('/login', function(req, res){
 /* Log out of Account */
 router.post('/logout', function(req, res){
     //if user is not logged in, return status: "error"
-    res.session.username = null;
+    req.session.username = null;
     res.send({status: "OK"});
 });
 
