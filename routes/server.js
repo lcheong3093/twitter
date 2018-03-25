@@ -77,11 +77,6 @@ router.post('/verify', function(req, res) {
 /* Log into Account */
 router.post('/login', function(req, res){
   var username = req.body.username;
-  console.log("***");
-  console.log("***");
-  console.log("username is: ", username);
-  console.log("***");
-  console.log("***");
   var password = req.body.password;
 
   checkLogin(username, password, function(err, string){
@@ -164,7 +159,7 @@ router.post('/additem', function(req, res){
 /* Get Item by ID */
 router.get('/item/:id', function(req, res){
     //Get contents of a single item given an ID
-    console.log("testsing: " + req.params.id);
+    console.log("req.params.id: " + req.params.id);
     res.send({status: "OK"});
 });
       
