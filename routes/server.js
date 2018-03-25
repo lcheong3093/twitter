@@ -107,7 +107,8 @@ router.post('/login', function(req, res){
       });
 
       //SESSION COOKIE
-      res.session.username = username;
+      if (username !== undefined)
+        res.session.username = username;
       res.send({status: "OK"});
       //RENDER FEED
     }
