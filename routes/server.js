@@ -59,7 +59,6 @@ router.post('/adduser', function(req, res) {
 
 /* Verify Account */
 router.post('/verify', function(req, res) {
-  console.log("test session: following hypen should be test- ", req.session.id);
   var email = req.body.email;
   var user_key = req.body.key;
 
@@ -118,6 +117,7 @@ router.post('/login', function(req, res){
 /* Log out of Account */
 router.post('/logout', function(req, res){
     //if user is not logged in, return status: "error"
+    res.session.username = null;
     res.send({status: "OK"});
 });
 
@@ -128,7 +128,7 @@ router.post('/additem', function(req, res){
 
   var username = req.session.username;
 
-  if(username === undefined){
+  if(username === undefined || username === null){
     console.log("no user is logged in");
     res.send({status: "error"});
   }else{
