@@ -357,6 +357,7 @@ function getStatus(username, callback){
 function getItem(id, callback){
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
+    var ObjectID = mongo.ObjectID;
     var twitter = db.db("twitter");
     var objectID = {"_id" : ObjectID(id)};
 	  twitter.collection("items").findOne(objectID, function(err, res) {
