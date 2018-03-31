@@ -173,7 +173,10 @@ router.get('/item/:id', function(req, res){
     });
 });
       
-/* Search for items by timestamp */
+// Search for items by timestamp 
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!     UPDATE THIS METHOD FOR MILESTONE 2     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
 router.post('/search', function(req, res){
   //Gets a list of the latest <limit> number of items prior to (and including) the provided <timestamp>
   var timestamp = req.body.timestamp;
@@ -189,8 +192,52 @@ router.post('/search', function(req, res){
   });
 });
 
+/***
+ * 
+ * 
+ * Milestone 2 - new API endpoints
+ *      > remember to update /search for milestone 2 requirements
+ * 
+***/
 
-/*** HELPERS ***/
+// Delete item given an ID
+router.delete('/item/:id', function(req, res){
+
+  res.send({status: "OK"});
+});
+
+// Gets user profile information
+router.get('/user/:username', function(req, res){
+
+  res.send({status: "OK"});
+});
+
+// Gets list of users following “username”
+router.get('/user/:username/followers', function(req, res){
+
+  res.send({status: "OK"});
+});
+
+// Gets list of users “username” is following
+router.get('/user/:username/following', function(req, res){
+
+  res.send({status: "OK"});
+});
+
+// Follow or unfollow a user
+router.post('/follow', function(req, res){
+
+  res.send({status: "OK"});
+});
+
+
+/*** 
+ * 
+ * HELPERS
+ * 
+ * 
+***/
+
 //Check for unique email & username
 function checkInfo(email, username, callback){
   // console.log("checkEmail: " + email);
