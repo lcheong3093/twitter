@@ -174,9 +174,6 @@ router.get('/item/:id', function(req, res){
 });
       
 // Search for items by timestamp 
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!     UPDATE THIS METHOD FOR MILESTONE 2     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-
 router.post('/search', function(req, res){
   //Gets a list of the latest <limit> number of items prior to (and including) the provided <timestamp>
   var timestamp = req.body.timestamp;
@@ -195,13 +192,14 @@ router.post('/search', function(req, res){
 /***
  * 
  * 
- * Milestone 2 - new API endpoints
+ *      > Milestone 2 - new API endpoints
  *      > remember to update /search for milestone 2 requirements
  * 
 ***/
 
 // Delete item given an ID
 router.delete('/item/:id', function(req, res){
+  // TODO -- make sure that the current user owns the tweet to be deleted
   var id = req.params.id;
   console.log("DELETE item by ID-- req.params.id: " + id);
   //send HTTP status code of 200 for OK, anything else for failure
@@ -250,7 +248,6 @@ router.post('/follow', function(req, res){
   });
   res.send({status: "OK"}); 
 });
-
 
 /*** 
  * 
@@ -390,9 +387,11 @@ function followUser(username, follow){
       // if follow === true && username doesn't exist in currentuser's following,
       //then add username to currentuser following, and add currentuser to username's followers
       if (follow === true && (users_found.find(username) === undefined)) {
-        
+        // twitter.collection("users").update ... 
+        // twitter.collection("users").update ... 
       } else if (follow === false && (users_found.find(username) !== undefined)) {
-
+        // twitter.collection("users").update ... 
+        // twitter.collection("users").update ... 
       }
       // if follow === false && username exists in currentuser's following, 
       //then remove from currentuser following and remove currentuser from username's followers
