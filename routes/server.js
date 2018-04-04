@@ -26,14 +26,18 @@ router.post('/adduser', function(req, res) {
 
   if(username == ""){
     // res.send("Please enter a username");
+    console.log("didn't enter username");
     res.send({status: "error"});
   }else if(email == ""){
     // res.send("Please enter an email");
+    console.log("didn't enter email");
     res.send({status: "error"});
   }else if(password == ""){
     // res.send("Please enter a password");
+    console.log("didn't enter password");
     res.send({status: "error"});
   }
+
   console.log("User: " + username + " Email: " + email + " Pass: " + password);
   checkInfo(email, username, function(err, string){
     if(err){ 
@@ -42,6 +46,7 @@ router.post('/adduser', function(req, res) {
     }
     if(string !== undefined) {
       // res.send(string);
+      console.log(string);
       res.send({status: "error"});
     } else {
       var key = rand.generateKey();
@@ -51,8 +56,8 @@ router.post('/adduser', function(req, res) {
       addNewUser(user, function(err, email){
         console.log("key: " + user.status);
         sendVerification(email, user.status);
-        // res.render('verify', {key: key, username: username});
-        res.send({status: "OK"});
+        res.render('verify', {key: key, email: email});
+        // res.send({status: "OK"});
       });
     }
   });
@@ -67,10 +72,12 @@ router.post('/verify', function(req, res) {
 
   checkKey(email, user_key, function(err, string){
     if(string !== undefined){
+      console.log(string);
       res.send({status: "error"});
     }else{
       verifyUser(email);
-      res.send({status: "OK"});
+      res.render('login');
+      // res.send({status: "OK"});
     }
   });
 }); 
@@ -93,7 +100,6 @@ router.post('/login', function(req, res){
         console.log("user does not exist");
         res.send({status: "error"});
       }
-      // res.send(string);
     }else{
       //Update status of user
       mongoClient.connect(url, function(err, db) {
@@ -110,8 +116,10 @@ router.post('/login', function(req, res){
       //SESSION COOKIE
       if (username !== undefined)
         req.session.username = username;
-      res.send({status: "OK"});
+
+      // res.send({status: "OK"});
       //RENDER FEED
+      res.render('feed');
     }
   });
 });
@@ -181,7 +189,7 @@ router.post('/search', function(req, res){
   if (req.body.limit === undefined || req.body.limit === null) {
     limit = 25; // default
   } else {
-    limit = req.body.limit;
+    limit = parseInt(req.body.limit);
   }
   searchByTimestamp(timestamp, limit, function(err, items){
     res.send({status: "OK", items: items}); // items is an array of item objects
