@@ -114,8 +114,10 @@ router.post('/login', function(req, res){
       });
 
       //SESSION COOKIE
-      if (username !== undefined)
+      if (username !== undefined){
+        console.log("set cookie");
         req.session.username = username;
+      }
 
       // res.send({status: "OK"});
       //RENDER FEED
@@ -126,9 +128,16 @@ router.post('/login', function(req, res){
 
 /* Log out of Account */
 router.post('/logout', function(req, res){
-    //if user is not logged in, return status: "error"
+  console.log("current user " + req.session.username);
+  
+  //if user is not logged in, return status: "error"
+  if(req.session.username === null){
+    console.log("No current users");
+    res.send({status: "error"});
+  }else{
     req.session.username = null;
     res.send({status: "OK"});
+  }
 });
 
 /* Add Item */
@@ -270,8 +279,7 @@ router.get('/user/:username/following', function(req, res){
 
 // Follow or unfollow a user
 router.post('/follow', function(req, res){
-  // var curent = req.session.username;  //User currently logged in
-  var current = "dummy";
+  var curent = req.session.username;  //User currently logged in
   var username = req.body.username;   //Username to follow
   var follow = req.body.follow;       //true = follow; false = unfollow
 
@@ -281,8 +289,8 @@ router.post('/follow', function(req, res){
     follow = true;    //Default follow = true;
   }
 
-  // console.log("user " + current + "follow: " + follow + " " + username);
-  console.log("follow: " + follow + " " + username);
+  console.log("user " + current + "follow: " + follow + " " + username);
+  // console.log("follow: " + follow + " " + username);
   
   follow(username, current, follow, function(err, ret){
     if(ret === false){
@@ -447,17 +455,30 @@ function follow(username, current, follow, callback){
 
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
-    
-	  db.db("twitter").collection("users").findOne({username: username}, function(err, user) {
+
+    //Can we assume that the current user is always a valid user? (from session)
+
+    var follower = {$push: {followers: current}};
+    db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
       if (err) throw err;
-      
-      if(user === null){
+
+      if(ret.matchedCount <= 0){
         console.log("Cannot find the user you're trying to follow");
         callback(err, false);
       }else{
-        callback(err, true);
+        var following = {$push: {following: username}};
+        db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
+          if (err) throw err;
+
+          if(!ret.acknowledged){
+            callback(err, false);
+          }else{
+            console.log("updated following/follower lists of both users")
+            callback(err, true);
+          }
+
+        });
       }
-      db.close();
     });
   });
   
