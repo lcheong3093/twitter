@@ -249,16 +249,18 @@ router.get('/user/:username', function(req, res){
   });
 });
 
-// Gets list of users following “username”
 router.get('/user/:username/followers', function(req, res){
   var username = req.params.username;
+  var limit = 50;
+  if (req.body.limit > 0 && req.body.limit <= 200)
+    limit = req.body.limit;
   getUser(username, function(err, ret){
     if(ret === null){
       console.log("could not find user: " + username);
       res.send({status: "error"});
     }else{
       console.log("Followers: ", ret.followers);
-      res.send({status: "OK", users: ret.followers});
+      res.send({status: "OK", users: ret.followers.slice(0, limit)});
     }
   });
 });
@@ -266,13 +268,16 @@ router.get('/user/:username/followers', function(req, res){
 // Gets list of users “username” is following
 router.get('/user/:username/following', function(req, res){
   var username = req.params.username;
+  var limit = 50;
+  if (req.body.limit > 0 && req.body.limit <= 200)
+    limit = req.body.limit;
   getUser(username, function(err, ret){
     if(ret === null){
       console.log("could not find user: " + username);
       res.send({status: "error"});
     }else{
-      console.log("Followers: ", ret.following);
-      res.send({status: "OK", users: ret.following});
+      console.log("Following: ", ret.following);
+      res.send({status: "OK", users: ret.following.slice(0,limit)});
     }
   });
 });
@@ -283,11 +288,13 @@ router.post('/follow', function(req, res){
   var username = req.body.username;   //Username to follow
   var follow = req.body.follow;       //true = follow; false = unfollow
 
-  if(follow === false){
-    follow = false;
-  }else{
-    follow = true;    //Default follow = true;
-  }
+  console.log("follow: " + follow);
+
+  // if(follow === false){
+  //   follow = false;
+  // }else{
+  //   follow = true;    //Default follow = true;
+  // }
 
   console.log("user " + current + " follow: " + follow + " " + username);
   // console.log("follow: " + follow + " " + username);
@@ -303,7 +310,7 @@ router.post('/follow', function(req, res){
   //   if (err) 
   //     res.send({status: "error"});
   // });
-  res.send({status: "OK"}); 
+  // res.send({status: "OK"}); 
 });
 
 /*** 
@@ -451,6 +458,7 @@ function verifyUser(email){
 
 //Update user's followers; either follow or unfollow (toggle boolean) the requested username
 function follow(username, current, follow, callback){
+  console.log("askdjflkjsaldf");
   console.log(current + " trying to follow/unfollow " + username);
 
   mongoClient.connect(url, function(err, db) {
