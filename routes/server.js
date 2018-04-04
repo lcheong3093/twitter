@@ -242,24 +242,6 @@ router.get('/user/:username', function(req, res){
 
 // Gets list of users following “username”
 router.get('/user/:username/followers', function(req, res){
-  // mongoClient.connect(url, function(err, db) {
-  //   if (err) throw err;
-  //   var ObjectID = mongo.ObjectID;
-  //   var twitter = db.db("twitter");
-	//   twitter.collection("users").findOne({username: req.params.username}, function(err, ret) {
-  //     if (err) throw err;
-      
-  //     if(ret === null){
-  //       console.log("could not find user: " + req.params.username);
-  //       res.send({status: "error"});
-  //     }else{
-  //       console.log(ret);
-  //       res.send({status: "OK", users: ret.followers})
-  //     }
-
-  //     db.close();
-  //   });
-  // });
   var username = req.params.username;
   getUser(username, function(err, ret){
     if(ret === null){
@@ -288,17 +270,31 @@ router.get('/user/:username/following', function(req, res){
 
 // Follow or unfollow a user
 router.post('/follow', function(req, res){
-  var username = req.body.username;
-  var follow = true;
-  if (req.body.follow === true || req.body.follow === false) {
-    follow = req.body.follow; 
+  // var curent = req.session.username;  //User currently logged in
+  var current = "dummy";
+  var username = req.body.username;   //Username to follow
+  var follow = req.body.follow;       //true = follow; false = unfollow
+
+  if(follow === false){
+    follow = false;
+  }else{
+    follow = true;    //Default follow = true;
   }
-  followUser(username, follow, function(err, record){
-    // if user is not able to be found, send "error" 
-    // dont think i did this right tbh
-    if (err) 
+
+  // console.log("user " + current + "follow: " + follow + " " + username);
+  console.log("follow: " + follow + " " + username);
+  
+  follow(username, current, follow, function(err, ret){
+    if(ret === false){
       res.send({status: "error"});
+    }
   });
+  // followUser(username, follow, function(err, record){
+  //   // if user is not able to be found, send "error" 
+  //   // dont think i did this right tbh
+  //   if (err) 
+  //     res.send({status: "error"});
+  // });
   res.send({status: "OK"}); 
 });
 
@@ -310,7 +306,7 @@ router.post('/follow', function(req, res){
 ***/
 
 
-//Get user from username
+//Get user object with username
 function getUser(username, callback){
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
@@ -446,30 +442,49 @@ function verifyUser(email){
 }
 
 //Update user's followers; either follow or unfollow (toggle boolean) the requested username
-function followUser(username, follow){
-  mongoClient.connect(url, function(err, db) {
-    if (err) throw err;		 
-    var twitter = db.db("twitter");
-    var currentuser = req.session.username;
-    console.log(currentuser);
-    //this gets the "following" list from the current user (hopefully)
-    twitter.collection("users").find({username: currentuser}, {following: true}).toArray(function(err, users_found){
-      // if follow === true && username doesn't exist in currentuser's following,
-      //then add username to currentuser following, and add currentuser to username's followers
-      if (follow === true && (users_found.find(username) === undefined)) {
-        // twitter.collection("users").update ... 
-        // twitter.collection("users").update ... 
-      } else if (follow === false && (users_found.find(username) !== undefined)) {
-        // twitter.collection("users").update ... 
-        // twitter.collection("users").update ... 
-      }
-      // if follow === false && username exists in currentuser's following, 
-      //then remove from currentuser following and remove currentuser from username's followers
+function follow(username, current, follow, callback){
+  console.log(current + " trying to follow/unfollow " + username);
 
+  mongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    
+	  db.db("twitter").collection("users").findOne({username: username}, function(err, user) {
+      if (err) throw err;
+      
+      if(user === null){
+        console.log("Cannot find the user you're trying to follow");
+        callback(err, false);
+      }else{
+        callback(err, true);
+      }
       db.close();
     });
   });
+  
+  // mongoClient.connect(url, function(err, db) {
+  //   if (err) throw err;		 
+  //   var twitter = db.db("twitter");
+  //   var currentuser = req.session.username;
+  //   console.log(currentuser);
+  //   //this gets the "following" list from the current user (hopefully)
+  //   twitter.collection("users").find({username: currentuser}, {following: true}).toArray(function(err, users_found){
+  //     // if follow === true && username doesn't exist in currentuser's following,
+  //     //then add username to currentuser following, and add currentuser to username's followers
+  //     if (follow === true && (users_found.find(username) === undefined)) {
+  //       // twitter.collection("users").update ... 
+  //       // twitter.collection("users").update ... 
+  //     } else if (follow === false && (users_found.find(username) !== undefined)) {
+  //       // twitter.collection("users").update ... 
+  //       // twitter.collection("users").update ... 
+  //     }
+  //     // if follow === false && username exists in currentuser's following, 
+  //     //then remove from currentuser following and remove currentuser from username's followers
+
+  //     db.close();
+  //   });
+  // });
 }
+
 
 //Check username & password & verification
 function checkLogin(username, password, callback){
