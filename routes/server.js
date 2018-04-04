@@ -12,7 +12,6 @@ router.use(session({
   resave: false,
   saveUninitialized: false
 }));
-
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('welcome');
@@ -46,7 +45,9 @@ router.post('/adduser', function(req, res) {
       res.send({status: "error"});
     } else {
       var key = rand.generateKey();
-      var user = {email: email, username: username, password: password, status: key};
+      var empty = [];
+      // Maybe followers/following lists should be Sets instead, so there can't be duplicates. not sure
+      var user = {email: email, username: username, password: password, status: key, followers: empty, following: empty};
       addNewUser(user, function(err, email){
         console.log("key: " + user.status);
         sendVerification(email, user.status);
@@ -236,8 +237,18 @@ router.get('/user/:username/following', function(req, res){
 
 // Follow or unfollow a user
 router.post('/follow', function(req, res){
-
-  res.send({status: "OK"});
+  var username = req.body.username;
+  var follow = true;
+  if (req.body.follow === true || req.body.follow === false) {
+    follow = req.body.follow; 
+  }
+  followUser(username, follow, function(err, record){
+    // if user is not able to be found, send "error" 
+    // dont think i did this right tbh
+    if (err) 
+      res.send({status: "error"});
+  });
+  res.send({status: "OK"}); 
 });
 
 
@@ -363,6 +374,33 @@ function verifyUser(email){
 	  twitter.collection("users").updateOne({email: email}, newvalues, function(err, res) {
       if (err) throw err;
       console.log("Verified user and updated db: ", email);
+        db.close();
+      });
+  });
+}
+
+//Update user's followers; either follow or unfollow (toggle boolean) the requested username
+function followUser(username, follow){
+  mongoClient.connect(url, function(err, db) {
+    if (err) throw err;		 
+    var twitter = db.db("twitter");
+    var currentuser = req.session.username;
+    //this gets the "following" list from the current user (hopefully)
+    twitter.collection("users").find({username: currentuser}, {following: true}).toArray(function(err, users_found){
+      // if follow === true && username doesn't exist in currentuser's following,
+      //then add username to currentuser following, and add currentuser to username's followers
+      if (follow === true && (users_found.find(username) === undefined)) {
+        
+      } else if (follow === false && (users_found.find(username) !== undefined)) {
+
+      }
+      // if follow === false && username exists in currentuser's following, 
+      //then remove from currentuser following and remove currentuser from username's followers
+    });
+    var newvalues = { $set: { status: "verified" } };
+	  twitter.collection("users").updateOne({username: username}, newvalues, function(err, res) {
+        if (err) throw err;
+        console.log("Verified user and updated db: ", email);
         db.close();
       });
   });
