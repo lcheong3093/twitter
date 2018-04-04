@@ -242,32 +242,48 @@ router.get('/user/:username', function(req, res){
 
 // Gets list of users following “username”
 router.get('/user/:username/followers', function(req, res){
-  mongoClient.connect(url, function(err, db) {
-    if (err) throw err;
-    var ObjectID = mongo.ObjectID;
-    var twitter = db.db("twitter");
-	  twitter.collection("users").findOne({username: req.params.username}, function(err, ret) {
-      if (err) throw err;
+  // mongoClient.connect(url, function(err, db) {
+  //   if (err) throw err;
+  //   var ObjectID = mongo.ObjectID;
+  //   var twitter = db.db("twitter");
+	//   twitter.collection("users").findOne({username: req.params.username}, function(err, ret) {
+  //     if (err) throw err;
       
-      if(ret === null){
-        console.log("could not find user: " + username);
-        res.send({status: "error"});
-      }else{
-        console.log(ret);
-        res.send({status: "OK", users: ret.followers})
-      }
+  //     if(ret === null){
+  //       console.log("could not find user: " + req.params.username);
+  //       res.send({status: "error"});
+  //     }else{
+  //       console.log(ret);
+  //       res.send({status: "OK", users: ret.followers})
+  //     }
 
-      db.close();
-    });
+  //     db.close();
+  //   });
+  // });
+  var username = req.params.username;
+  getUser(username, function(err, ret){
+    if(ret === null){
+      console.log("could not find user: " + username);
+      res.send({status: "error"});
+    }else{
+      console.log("Followers: ", ret.followers);
+      res.send({status: "OK", users: ret.followers});
+    }
   });
-
-  res.send({status: "OK"});
 });
 
 // Gets list of users “username” is following
 router.get('/user/:username/following', function(req, res){
-
-  res.send({status: "OK"});
+  var username = req.params.username;
+  getUser(username, function(err, ret){
+    if(ret === null){
+      console.log("could not find user: " + username);
+      res.send({status: "error"});
+    }else{
+      console.log("Followers: ", ret.following);
+      res.send({status: "OK", users: ret.following});
+    }
+  });
 });
 
 // Follow or unfollow a user
@@ -293,7 +309,8 @@ router.post('/follow', function(req, res){
  * 
 ***/
 
-//Get user info
+
+//Get user from username
 function getUser(username, callback){
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
