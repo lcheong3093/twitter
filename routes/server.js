@@ -52,7 +52,7 @@ router.post('/adduser', function(req, res) {
       var key = rand.generateKey();
       var empty = [];
       // Maybe followers/following lists should be Sets instead, so there can't be duplicates. not sure
-      var user = {email: email, username: username, password: password, status: key, followers: empty, following: empty};
+      var user = {email: email, username: username, password: password, status: key, followers: [], following: []};
       addNewUser(user, function(err, email){
         console.log("key: " + user.status);
         sendVerification(email, user.status);
@@ -225,8 +225,21 @@ router.delete('/item/:id', function(req, res){
 
 // Gets user profile information
 router.get('/user/:username', function(req, res){
+  var username = req.params.username;
+  console.log("get user info: " + username);
 
-  res.send({status: "OK"});
+  getUser(username, function(err, ret){
+    if(ret === null){
+      console.log("could not find user: " + username);
+      res.send({status: "error"});
+    }else{
+      console.log(ret);
+      var user = {email: ret.email, followers: ret.followers.length, following: ret.following.length};
+      res.send({status: "OK", user})
+    }
+  });
+
+  // res.send({status: "OK"});
 });
 
 // Gets list of users following “username”
@@ -263,6 +276,21 @@ router.post('/follow', function(req, res){
  * 
  * 
 ***/
+
+//Get user info
+function getUser(username, callback){
+  mongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var ObjectID = mongo.ObjectID;
+    var twitter = db.db("twitter");
+	  twitter.collection("users").findOne({username: username}, function(err, res) {
+      if (err) throw err;
+      callback(err, res);
+      db.close();
+    });
+  });
+}
+
 
 //Check for unique email & username
 function checkInfo(email, username, callback){
