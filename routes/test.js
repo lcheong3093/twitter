@@ -25,14 +25,14 @@ router.post('/adduser', function(req, res) {
   var password = req.body.password;
 
   if(username == ""){
-    // res.send("Please enter a username");
-    res.send({status: "error"});
+    res.send("Please enter a username");
+    // res.send({status: "error"});
   }else if(email == ""){
-    // res.send("Please enter an email");
-    res.send({status: "error"});
+    res.send("Please enter an email");
+    // res.send({status: "error"});
   }else if(password == ""){
-    // res.send("Please enter a password");
-    res.send({status: "error"});
+    res.send("Please enter a password");
+    // res.send({status: "error"});
   }
   console.log("User: " + username + " Email: " + email + " Pass: " + password);
   checkInfo(email, username, function(err, string){
@@ -41,8 +41,8 @@ router.post('/adduser', function(req, res) {
       res.send({status: "error"});
     }
     if(string !== undefined) {
-      // res.send(string);
-      res.send({status: "error"});
+      res.send(string);
+    //   res.send({status: "error"});
     } else {
       var key = rand.generateKey();
       var empty = [];
@@ -51,8 +51,8 @@ router.post('/adduser', function(req, res) {
       addNewUser(user, function(err, email){
         console.log("key: " + user.status);
         sendVerification(email, user.status);
-        // res.render('verify', {key: key, username: username});
-        res.send({status: "OK"});
+        res.render('verify', {key: key, username: username});
+        // res.send({status: "OK"});
       });
     }
   });
@@ -70,7 +70,8 @@ router.post('/verify', function(req, res) {
       res.send({status: "error"});
     }else{
       verifyUser(email);
-      res.send({status: "OK"});
+    //   res.send({status: "OK"});
+      res.render('login');
     }
   });
 }); 
@@ -85,15 +86,15 @@ router.post('/login', function(req, res){
       console.log("login string:", string);
       if(string === "unverified"){
         console.log("account unverified");
-        res.send({status: "error"});
+        // res.send({status: "error"});
       }else if(string === "incorrect"){
         console.log("incorrect password");
-        res.send({status: "error"});
+        // res.send({status: "error"});
       }else if(string === "null"){
         console.log("user does not exist");
-        res.send({status: "error"});
+        // res.send({status: "error"});
       }
-      // res.send(string);
+      res.send(string);
     }else{
       //Update status of user
       mongoClient.connect(url, function(err, db) {
