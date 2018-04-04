@@ -238,12 +238,28 @@ router.get('/user/:username', function(req, res){
       res.send({status: "OK", user})
     }
   });
-
-  // res.send({status: "OK"});
 });
 
 // Gets list of users following “username”
 router.get('/user/:username/followers', function(req, res){
+  mongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var ObjectID = mongo.ObjectID;
+    var twitter = db.db("twitter");
+	  twitter.collection("users").findOne({username: req.params.username}, function(err, ret) {
+      if (err) throw err;
+      
+      if(ret === null){
+        console.log("could not find user: " + username);
+        res.send({status: "error"});
+      }else{
+        console.log(ret);
+        res.send({status: "OK", users: ret.followers})
+      }
+
+      db.close();
+    });
+  });
 
   res.send({status: "OK"});
 });
