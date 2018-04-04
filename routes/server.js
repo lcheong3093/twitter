@@ -56,8 +56,8 @@ router.post('/adduser', function(req, res) {
       addNewUser(user, function(err, email){
         console.log("key: " + user.status);
         sendVerification(email, user.status);
-        // res.render('verify', {key: key, email: email});
-        res.send({status: "OK"});
+        res.render('verify', {key: key, email: email});
+        // res.send({status: "OK"});
       });
     }
   });
@@ -76,8 +76,8 @@ router.post('/verify', function(req, res) {
       res.send({status: "error"});
     }else{
       verifyUser(email);
-      // res.render('login');
-      res.send({status: "OK"});
+      res.render('login');
+      // res.send({status: "OK"});
     }
   });
 }); 
@@ -119,9 +119,9 @@ router.post('/login', function(req, res){
         req.session.username = username;
       }
 
-      res.send({status: "OK"});
+      // res.send({status: "OK"});
       //RENDER FEED
-      // res.render('feed');
+      res.render('feed');
     }
   });
 });
@@ -165,7 +165,6 @@ router.post('/additem', function(req, res){
     var item = {username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
     
     addNewItem(item, function(err, id){
-      // res.render('verify', {key: key, username: username});
       console.log("id returned: " + id);
       res.send({status: "OK", id: id});
     });
@@ -301,6 +300,8 @@ router.post('/follow', function(req, res){
   followUser(username, current, follow, function(err, ret){
     if(ret === false){
       res.send({status: "error"});
+    }else{
+      res.send({status: "OK"});
     }
   });
 });
@@ -450,37 +451,65 @@ function verifyUser(email){
 
 //Update user's followers; either follow or unfollow (toggle boolean) the requested username
 function followUser(username, current, follow, callback){
-  console.log(current + " trying to follow/unfollow " + username);
 
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
 
     //Can we assume that the current user is always a valid user? (from session)
+    if(follow){
+    console.log(current + " trying to follow " + username);
+      var follower = {$addToSet: {followers: current}};
+      db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
+        if (err) throw err;
 
-    var follower = {$addToSet: {followers: current}};
-    db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
-      if (err) throw err;
+        if(ret.matchedCount <= 0){
+          console.log("Cannot find the user you're trying to follow");
+          callback(err, false);
+        }else{
+          console.log("updated " + username + "'s followers");
+          var following = {$addToSet: {following: username}};
+          db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
+            if (err) throw err;
 
-      if(ret.matchedCount <= 0){
-        console.log("Cannot find the user you're trying to follow");
-        callback(err, false);
-      }else{
-        console.log("updated " + username + "'s followers");
-        var following = {$addToSet: {following: username}};
-        db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
-          if (err) throw err;
+            if(ret.matchedCount <= 0){
+              console.log("??");
+              callback(err, false);
+            }else{
+              console.log("updated following/follower lists of both users")
+              callback(err, true);
+            }
 
-          if(ret.matchedCount <= 0){
-            console.log("??");
-            callback(err, false);
-          }else{
-            console.log("updated following/follower lists of both users")
-            callback(err, true);
-          }
+          });
+        }
+      });
+    }else{
+      console.log(current + " trying to unfollow " + username);
+      var follower = {$pull: {followers: current}};
+      db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
+        if (err) throw err;
 
-        });
-      }
-    });
+        if(ret.matchedCount <= 0){
+          console.log("Cannot find the user you're trying to unfollow");
+          callback(err, false);
+        }else{
+          console.log("updated " + username + "'s followers");
+          var following = {$pull: {following: username}};
+          db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
+            if (err) throw err;
+
+            if(ret.matchedCount <= 0){
+              console.log("??");
+              callback(err, false);
+            }else{
+              console.log("updated following/follower lists of both users")
+              callback(err, true);
+            }
+
+          });
+        }
+      });
+    }
+    
   });
 }
 
