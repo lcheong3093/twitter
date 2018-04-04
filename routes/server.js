@@ -297,20 +297,12 @@ router.post('/follow', function(req, res){
   // }
 
   console.log("user " + current + " follow: " + follow + " " + username);
-  // console.log("follow: " + follow + " " + username);
   
-  follow(username, current, follow, function(err, ret){
+  followUser(username, current, follow, function(err, ret){
     if(ret === false){
       res.send({status: "error"});
     }
   });
-  // followUser(username, follow, function(err, record){
-  //   // if user is not able to be found, send "error" 
-  //   // dont think i did this right tbh
-  //   if (err) 
-  //     res.send({status: "error"});
-  // });
-  // res.send({status: "OK"}); 
 });
 
 /*** 
@@ -457,8 +449,7 @@ function verifyUser(email){
 }
 
 //Update user's followers; either follow or unfollow (toggle boolean) the requested username
-function follow(username, current, follow, callback){
-  console.log("askdjflkjsaldf");
+function followUser(username, current, follow, callback){
   console.log(current + " trying to follow/unfollow " + username);
 
   mongoClient.connect(url, function(err, db) {
@@ -466,7 +457,7 @@ function follow(username, current, follow, callback){
 
     //Can we assume that the current user is always a valid user? (from session)
 
-    var follower = {$push: {followers: current}};
+    var follower = {$addToSet: {followers: current}};
     db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
       if (err) throw err;
 
@@ -474,11 +465,13 @@ function follow(username, current, follow, callback){
         console.log("Cannot find the user you're trying to follow");
         callback(err, false);
       }else{
-        var following = {$push: {following: username}};
+        console.log("updated " + username + "'s followers");
+        var following = {$addToSet: {following: username}};
         db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
           if (err) throw err;
 
-          if(!ret.acknowledged){
+          if(ret.matchedCount <= 0){
+            console.log("??");
             callback(err, false);
           }else{
             console.log("updated following/follower lists of both users")
@@ -489,29 +482,6 @@ function follow(username, current, follow, callback){
       }
     });
   });
-  
-  // mongoClient.connect(url, function(err, db) {
-  //   if (err) throw err;		 
-  //   var twitter = db.db("twitter");
-  //   var currentuser = req.session.username;
-  //   console.log(currentuser);
-  //   //this gets the "following" list from the current user (hopefully)
-  //   twitter.collection("users").find({username: currentuser}, {following: true}).toArray(function(err, users_found){
-  //     // if follow === true && username doesn't exist in currentuser's following,
-  //     //then add username to currentuser following, and add currentuser to username's followers
-  //     if (follow === true && (users_found.find(username) === undefined)) {
-  //       // twitter.collection("users").update ... 
-  //       // twitter.collection("users").update ... 
-  //     } else if (follow === false && (users_found.find(username) !== undefined)) {
-  //       // twitter.collection("users").update ... 
-  //       // twitter.collection("users").update ... 
-  //     }
-  //     // if follow === false && username exists in currentuser's following, 
-  //     //then remove from currentuser following and remove currentuser from username's followers
-
-  //     db.close();
-  //   });
-  // });
 }
 
 
