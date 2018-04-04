@@ -279,7 +279,7 @@ router.get('/user/:username/following', function(req, res){
 
 // Follow or unfollow a user
 router.post('/follow', function(req, res){
-  var curent = req.session.username;  //User currently logged in
+  var current = req.session.username;  //User currently logged in
   var username = req.body.username;   //Username to follow
   var follow = req.body.follow;       //true = follow; false = unfollow
 
@@ -289,7 +289,7 @@ router.post('/follow', function(req, res){
     follow = true;    //Default follow = true;
   }
 
-  console.log("user " + current + "follow: " + follow + " " + username);
+  console.log("user " + current + " follow: " + follow + " " + username);
   // console.log("follow: " + follow + " " + username);
   
   follow(username, current, follow, function(err, ret){
