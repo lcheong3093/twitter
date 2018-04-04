@@ -158,9 +158,8 @@ router.post('/additem', function(req, res){
 
 /* Get Item by ID */
 router.get('/item/:id', function(req, res){
-    //Get contents of a single item given an ID
     var id = req.params.id;
-    console.log("req.params.id: " + id);
+    console.log("GET item by ID-- req.params.id: " + id);
 
     getItem(id, function(err, item){
       if(item === null){
@@ -202,8 +201,19 @@ router.post('/search', function(req, res){
 
 // Delete item given an ID
 router.delete('/item/:id', function(req, res){
-
-  res.send({status: "OK"});
+  var id = req.params.id;
+  console.log("DELETE item by ID-- req.params.id: " + id);
+  //send HTTP status code of 200 for OK, anything else for failure
+  deleteItem(id, function(err, item){
+    if(err !== null){
+      console.log("error; (possibly) could not find item");
+      res.sendStatus(500);
+    }else{
+      console.log("item deleted");
+      res.sendStatus(200);
+    }
+  });
+  //res.status(200).send();
 });
 
 // Gets user profile information
@@ -284,7 +294,7 @@ function addNewUser(user, callback){
 	});
 }
 
-//Add user to database
+//Add item to database
 function addNewItem(item, callback){
   mongoClient.connect(url, function(err, db) {
 		if (err) throw err;		
@@ -408,6 +418,21 @@ function getItem(id, callback){
     var twitter = db.db("twitter");
     var objectID = {"_id" : ObjectID(String(id))};
 	  twitter.collection("items").findOne(objectID, function(err, res) {
+      if (err) throw err;
+      callback(err, res);
+      db.close();
+    });
+  });
+}
+
+//Delete item by ID
+function deleteItem(id, callback){
+  mongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    var ObjectID = mongo.ObjectID;
+    var twitter = db.db("twitter");
+    var objectID = {"_id" : ObjectID(String(id))};
+	  twitter.collection("items").deleteOne(objectID, function(err, res) {
       if (err) throw err;
       callback(err, res);
       db.close();
