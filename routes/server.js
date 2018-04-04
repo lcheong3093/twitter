@@ -396,13 +396,9 @@ function followUser(username, follow){
       }
       // if follow === false && username exists in currentuser's following, 
       //then remove from currentuser following and remove currentuser from username's followers
+
+      db.close();
     });
-    var newvalues = { $set: { status: "verified" } };
-	  twitter.collection("users").updateOne({username: username}, newvalues, function(err, res) {
-        if (err) throw err;
-        console.log("Verified user and updated db: ", email);
-        db.close();
-      });
   });
 }
 
