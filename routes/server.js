@@ -191,32 +191,28 @@ router.get('/item/:id', function(req, res){
 // Search for items by timestamp. 
 router.post('/search', function(req, res){
   //Gets a list of the latest <limit> number of items prior to (and including) the provided <timestamp>
-  var timestamp = 0; // int: return items from this date and earlier
-  if (req.body.timestamp === undefined || req.body.timestamp === null) {
-    timestamp = Date.now()  // default
-  } else {
-    timestamp = req.body.timestamp;
+  var timestamp = Date.now(); // int: return items from this date and earlier
+  var limit = 25; //int: number of items to return
+  var q = "";  //string: only return items that match (or contain? not sure) the search query (supports spaces)
+  var username = "";  //string: only return items by this username
+  var following = true;  //boolean: if true, only return items made by users that logged in user follows
+  var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
+  var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
+
+  for(var opt in defaults){ 
+    query[opt] = defaults[opt]; //set up query with defaults
   }
-  var limit = 0; //int: number of items to return
-  if (req.body.limit === undefined || req.body.limit === null) {
-    limit = 25; // default
+  for(var key in req.body){ 
+    query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
+  }
+
+  if (req.body.limit === undefined || req.body.limit === null) {  //special case (?) for limit to parseInt and error check
+    query.limit = 25; // default
   } else {
-    limit = parseInt(req.body.limit);
-    if (limit > 100) {
+    query.limit = parseInt(req.body.limit);
+    if (query.limit > 100) {
       res.send({status: "error", error: "Limit must be maximum of 100"});
     }
-  }
-  var q = "";  //string: only return items that match (or contain? not sure) the search query (supports spaces)
-  if (req.body.q !== undefined && req.body.q !== null) {
-    q = req.body.q;
-  }
-  var username = "";  //string: only return items by this username
-  if (req.body.username !== undefined && req.body.username !== null) {
-    username = req.body.username;
-  }
-  var following = true;  //boolean: if true, only return items made by users that logged in user follows
-  if (req.body.following === false) {
-    following = false;
   }
 
   searchByTimestamp(timestamp, limit, q, username, following, req.db, function(err, items){
