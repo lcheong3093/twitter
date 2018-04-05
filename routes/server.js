@@ -202,18 +202,43 @@ router.get('/item/:id', function(req, res){
       
 // Search for items by timestamp 
 router.post('/search', function(req, res){
-  //Gets a list of the latest <limit> number of items prior to (and including) the provided <timestamp>
+  // //Gets a list of the latest <limit> number of items prior to (and including) the provided <timestamp>
+  // var timestamp = req.body.timestamp;
+  // var limit = 0;
+  // if (req.body.limit === undefined || req.body.limit === null) {
+  //   limit = 25; // default
+  // } else {
+  //   limit = parseInt(req.body.limit);
+  // }
+  // searchByTimestamp(timestamp, limit, req.db, function(err, items){
+  //   res.send({status: "OK", items: items}); // items is an array of item objects
+  //   // res.send({status:"error"});
+  // });
   var timestamp = req.body.timestamp;
-  var limit = 0;
-  if (req.body.limit === undefined || req.body.limit === null) {
-    limit = 25; // default
-  } else {
-    limit = parseInt(req.body.limit);
+  var limit = req.body.limit;
+  var query = req.body.query;
+  var username = req.body.username;
+  var following = req.body.following;
+
+  //Defaults
+  if(timestamp === ""){
+    timestamp = new Date().toISOString();
   }
-  searchByTimestamp(timestamp, limit, req.db, function(err, items){
-    res.send({status: "OK", items: items}); // items is an array of item objects
-    // res.send({status:"error"});
-  });
+  if(limit === ""){
+    limit = 25;
+  }
+  if(following !== true && following !== false){
+    following = true;
+  } 
+
+  if(limit > 100){
+    res.send({status: "error", error: "Limit must be less than 100"});
+    console.log("Limit must be less than 100");
+  }else{
+    search(timestamp, limit, query, username, following, function(err, items){
+      res.send({status: "OK", items: items});
+    });
+  }
 });
 
 /***
@@ -422,7 +447,6 @@ function checkKey(email, key, db, callback){
 
 //Update user's status to verified
 function verifyUser(email, db){
-    if (err) throw err;		 
     var twitter = db.db("twitter");
     var newvalues = { $set: { status: "verified" } };
 	  twitter.collection("users").updateOne({email: email}, newvalues, function(err, res) {
@@ -558,6 +582,18 @@ function searchByTimestamp(timestamp, limit, db, callback){
   var twitter = db.db("twitter");
   console.log("timestamp:", timestamp);
   console.log("limit:", limit);
+  var options = {"limit":limit};
+  twitter.collection("items").find({"timestamp":{$gte:timestamp}}, options).toArray(function(err, items_found) {
+    if (err) throw err;
+    console.log("items found: ", items_found);
+    callback(err, items_found);
+  });
+}
+
+function search(timestamp, limit, query, username, following, callback){
+  var twitter = db.db("twitter");
+  
+  console.log("SEARCHING.......")
   var options = {"limit":limit};
   twitter.collection("items").find({"timestamp":{$gte:timestamp}}, options).toArray(function(err, items_found) {
     if (err) throw err;
