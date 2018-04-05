@@ -14,7 +14,7 @@ router.use(session({
 }));
 
 var tq = require('task-queue');
-var queue = tq.Queue({capacity: 1000, concurrency: 1});
+var queue = tq.Queue({capacity: 100, concurrency: 1});
 queue.start();
 
 var count = 0;
@@ -117,16 +117,13 @@ router.post('/login', function(req, res){
         if (err) throw err;
         console.log("User logged in and updated db: ", username);
       });
-
       //SESSION COOKIE
       if (username !== undefined){
         console.log("set cookie");
       }else{
         console.log("someone else is logged on...replacing current user");
       }
-
       req.session.username = username;
-
       res.send({status: "OK"});
       //RENDER FEED
       // res.render('feed');
@@ -137,7 +134,6 @@ router.post('/login', function(req, res){
 /* Log out of Account */
 router.post('/logout', function(req, res){
   console.log("current user " + req.session.username);
-  
   //if user is not logged in, return status: "error"
   if(req.session.username === null){
     console.log("No current users");
@@ -152,9 +148,7 @@ router.post('/logout', function(req, res){
 router.post('/additem', function(req, res){
   //Post a new item
   //Only allowed if logged in
-
   var username = req.session.username;
-
   if(username === undefined || username === null){
     console.log("no user is logged in");
     res.send({status: "error"});
@@ -164,7 +158,6 @@ router.post('/additem', function(req, res){
     /* 
       error-checking for content/childtype
     */
-
     console.log("content: " + content + " childType: " + childType);
     /*
       check if logged in using session cookie
@@ -172,18 +165,11 @@ router.post('/additem', function(req, res){
     var timestamp = new Date().toISOString();
     var id = rand.generateKey();
     var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
-    
-    res.send({status: "OK", id: id});
-    
     queue.enqueue(addNewItem, {args: [item, req.db]});
-
-
+    res.send({status: "OK", id: id});
     count++;
-
     console.log("added insert to queue - total: " + count);
   }
-  
-
 });
 
 /* Get Item by ID */
@@ -256,7 +242,6 @@ router.delete('/item/:id', function(req, res){
   // TODO -- make sure that the current user owns the tweet to be deleted
   var id = req.params.id;
   console.log("DELETE item by ID-- req.params.id: " + id);
-  //send HTTP status code of 200 for OK, anything else for failure
   deleteItem(id, req.db, function(err, item){
     console.log("hello?");
     if(err !== null){
@@ -274,7 +259,6 @@ router.delete('/item/:id', function(req, res){
 router.get('/user/:username', function(req, res){
   var username = req.params.username;
   console.log("get user info: " + username);
-
   getUser(username, req.db, function(err, ret){
     if(ret === null){
       console.log("could not find user: " + username);
@@ -327,13 +311,6 @@ router.post('/follow', function(req, res){
   var follow = req.body.follow;       //true = follow; false = unfollow
 
   console.log("follow: " + follow);
-
-  // if(follow === false){
-  //   follow = false;
-  // }else{
-  //   follow = true;    //Default follow = true;
-  // }
-
   console.log("user " + current + " follow: " + follow + " " + username);
   
   followUser(username, current, follow, function(err, ret){
@@ -352,7 +329,6 @@ router.post('/follow', function(req, res){
  * 
 ***/
 
-
 //Get user object with username
 function getUser(username, db, callback){
   var twitter = db.db("twitter");
@@ -362,13 +338,11 @@ function getUser(username, db, callback){
   });
 }
 
-
 //Check for unique email & username
 function checkInfo(email, username, db, callback){
   var twitter = db.db("twitter");
   twitter.collection("users").findOne({$or: [{email: email}, {username: username}]}, function(err, res) {
     if (err) throw err;
-
     if(res !== null){
       if(res.email === email){
         var string = "Email already exists: " + res.email;
@@ -459,17 +433,14 @@ function verifyUser(email, db){
 
 //Update user's followers; either follow or unfollow (toggle boolean) the requested username
 function followUser(username, current, follow, callback){
-
   mongoClient.connect(url, function(err, db) {
     if (err) throw err;
-
     //Can we assume that the current user is always a valid user? (from session)
     if(follow){
     console.log(current + " trying to follow " + username);
       var follower = {$addToSet: {followers: current}};
       db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
         if (err) throw err;
-
         if(ret.matchedCount <= 0){
           console.log("Cannot find the user you're trying to follow");
           callback(err, false);
@@ -478,7 +449,6 @@ function followUser(username, current, follow, callback){
           var following = {$addToSet: {following: username}};
           db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
             if (err) throw err;
-
             if(ret.matchedCount <= 0){
               console.log("??");
               callback(err, false);
@@ -486,7 +456,6 @@ function followUser(username, current, follow, callback){
               console.log("updated following/follower lists of both users")
               callback(err, true);
             }
-
           });
         }
       });
@@ -495,7 +464,6 @@ function followUser(username, current, follow, callback){
       var follower = {$pull: {followers: current}};
       db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
         if (err) throw err;
-
         if(ret.matchedCount <= 0){
           console.log("Cannot find the user you're trying to unfollow");
           callback(err, false);
@@ -504,7 +472,6 @@ function followUser(username, current, follow, callback){
           var following = {$pull: {following: username}};
           db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
             if (err) throw err;
-
             if(ret.matchedCount <= 0){
               console.log("??");
               callback(err, false);
@@ -512,15 +479,12 @@ function followUser(username, current, follow, callback){
               console.log("updated following/follower lists of both users")
               callback(err, true);
             }
-
           });
         }
       });
     }
-    
   });
 }
-
 
 //Check username & password & verification
 function checkLogin(username, password, db, callback){
