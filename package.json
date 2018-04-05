@@ -12,6 +12,7 @@
     "debug": "~2.6.9",
     "ejs": "~2.5.7",
     "express": "~4.15.5",
+    "express-mongo-db": "^2.0.4",
     "express-session": "^1.15.6",
     "generate-key": "0.0.6",
     "mongodb": "^3.0.4",
