@@ -564,7 +564,7 @@ function search(query, limit, current, db, callback){
   if(following === true){
     newq = {username: {$ne: current}, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
   }else{
-    newq = {username: username, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
+    newq = {username: query.username, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
   }
 
   
