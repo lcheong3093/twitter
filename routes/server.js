@@ -197,7 +197,7 @@ router.post('/search', function(req, res){
   var username = "";  //string: only return items by this username
   var following = true;  //boolean: if true, only return items made by users that logged in user follows
   var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
-  var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
+  var defaults = {timestamp: timestamp, q: q, username: username, following: following};
 
   for(var opt in defaults){ 
     query[opt] = defaults[opt]; //set up query with defaults
