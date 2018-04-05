@@ -239,7 +239,7 @@ router.get('/user/:username', function(req, res){
   var username = req.params.username;
   console.log("get user info: " + username);
 
-  getUser(username, ,req.db, function(err, ret){
+  getUser(username, req.db, function(err, ret){
     if(ret === null){
       console.log("could not find user: " + username);
       res.send({status: "error"});
