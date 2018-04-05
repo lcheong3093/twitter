@@ -207,7 +207,7 @@ router.post('/search', function(req, res){
       query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
   } 
 
-  if (req.body.limit === "") {  //special case (?) for limit to parseInt and error check
+  if (Number.isNaN(req.body.limit)) {  //special case (?) for limit to parseInt and error check
     query.limit = 25; // default
   } else {
     query.limit = parseInt(req.body.limit);
