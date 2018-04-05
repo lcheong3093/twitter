@@ -197,15 +197,18 @@ router.post('/search', function(req, res){
   var username = "";  //string: only return items by this username
   var following = true;  //boolean: if true, only return items made by users that logged in user follows
   var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
-  var defaults = {timestamp: timestamp, q: q, username: username, following: following};
+  var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
 
   for(var opt in defaults){ 
     query[opt] = defaults[opt]; //set up query with defaults
   }
+  console.log("query with defaults: ", query);
+
   for(var key in req.body){ 
     if(req.body[key] !== "")
       query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
   } 
+  console.log("query req.body overwrites: ", query);
 
   if (Number.isNaN(req.body.limit)) {  //special case (?) for limit to parseInt and error check
     query[limit] = 25; // default
