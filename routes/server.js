@@ -208,14 +208,17 @@ router.post('/search', function(req, res){
   } 
 
   if (Number.isNaN(req.body.limit)) {  //special case (?) for limit to parseInt and error check
-    query.limit = 25; // default
+    query[limit] = 25; // default
   } else {
-    query.limit = parseInt(req.body.limit);
-    if (query.limit > 100) {
+    query[limit] = parseInt(req.body.limit);
+    if (query[limit] > 100) {
       res.send({status: "error", error: "Limit must be maximum of 100"});
     }
   }
-
+  // if (Number.isNaN(req.body.limit)) {
+  //   console.log("limit is NaN");
+  //   query[limit] = 25;
+  // }
   console.log("search: ", query);
   // searchByTimestamp(timestamp, limit, q, username, following, req.db, function(err, items){
   //   res.send({status: "OK", items: items}); // items is an array of item objects
