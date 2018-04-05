@@ -14,7 +14,7 @@ router.use(session({
 }));
 
 var tq = require('task-queue');
-var queue = tq.Queue({capacity: 100, concurrency: 1});
+var queue = tq.Queue({capacity: 1000, concurrency: 1});
 queue.start();
 
 var count = 0;
@@ -173,9 +173,10 @@ router.post('/additem', function(req, res){
     var id = rand.generateKey();
     var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
     
+    res.send({status: "OK", id: id});
+    
     queue.enqueue(addNewItem, {args: [item, req.db]});
 
-    res.send({status: "OK", id: id});
 
     count++;
 
