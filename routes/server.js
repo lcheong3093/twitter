@@ -2,17 +2,20 @@ var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb');
 var mongoClient = mongo.MongoClient;
-var url = "mongodb://localhost"
+var url = "mongodb://localhost";
 
 var nodemailer = require('nodemailer');
 var rand = require('generate-key');
-var session = require('express-session')
+var session = require('express-session');
+
+var count = 0;
 
 router.use(session({
   secret: 'foo',  
   resave: false,
   saveUninitialized: false
 }));
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('welcome');
@@ -71,12 +74,12 @@ router.post('/verify', function(req, res) {
 
   console.log("email: " + email + " key: " + user_key);
 
-  checkKey(email, user_key, function(err, string){
+  checkKey(email, user_key, req.db, function(err, string){
     if(string !== undefined){
       console.log(string);
       res.send({status: "error"});
     }else{
-      verifyUser(email);
+      verifyUser(email, req.db);
       // res.render('login');
       res.send({status: "OK"});
     }
@@ -88,7 +91,7 @@ router.post('/login', function(req, res){
   var username = req.body.username;
   var password = req.body.password;
 
-  checkLogin(username, password, function(err, string){
+  checkLogin(username, password, req.db, function(err, string){
     if(string !== undefined){
       console.log("login string:", string);
       if(string === "unverified"){
@@ -103,15 +106,12 @@ router.post('/login', function(req, res){
       }
     }else{
       //Update status of user
-      mongoClient.connect(url, function(err, db) {
-        if (err) throw err;		 
-        var twitter = db.db("twitter");
-        var newvalues = { $set: { status: "active" } };
-        twitter.collection("users").updateOne({username: username}, newvalues, function(err, res) {
-          if (err) throw err;
-          console.log("User logged in and updated db: ", username);
-            db.close();
-          });
+      if (err) throw err;		 
+      var twitter = db.db("twitter");
+      var newvalues = { $set: { status: "active" } };
+      twitter.collection("users").updateOne({username: username}, newvalues, function(err, res) {
+        if (err) throw err;
+        console.log("User logged in and updated db: ", username);
       });
 
       
@@ -181,7 +181,7 @@ router.get('/item/:id', function(req, res){
     var id = req.params.id;
     console.log("GET item by ID-- req.params.id: " + id);
 
-    getItem(id, function(err, item){
+    getItem(id, req.db, function(err, item){
       if(item === null){
         console.log("could not find item");
         res.send({status: "error"});
@@ -202,7 +202,7 @@ router.post('/search', function(req, res){
   } else {
     limit = parseInt(req.body.limit);
   }
-  searchByTimestamp(timestamp, limit, function(err, items){
+  searchByTimestamp(timestamp, limit, req.db, function(err, items){
     res.send({status: "OK", items: items}); // items is an array of item objects
     // res.send({status:"error"});
   });
@@ -222,7 +222,7 @@ router.delete('/item/:id', function(req, res){
   var id = req.params.id;
   console.log("DELETE item by ID-- req.params.id: " + id);
   //send HTTP status code of 200 for OK, anything else for failure
-  deleteItem(id, function(err, item){
+  deleteItem(id, req.db, function(err, item){
     if(err !== null){
       console.log("error; (possibly) could not find item");
       res.sendStatus(500);
@@ -319,17 +319,6 @@ router.post('/follow', function(req, res){
 
 //Get user object with username
 function getUser(username, db, callback){
-  // mongoClient.connect(url, function(err, db) {
-  //   if (err) throw err;
-  //   var ObjectID = mongo.ObjectID;
-  //   var twitter = db.db("twitter");
-	//   twitter.collection("users").findOne({username: username}, function(err, res) {
-  //     if (err) throw err;
-  //     callback(err, res);
-  //     db.close();
-  //   });
-  // });
-
   var ObjectID = mongo.ObjectID;
   var twitter = db.db("twitter");
   twitter.collection("users").findOne({username: username}, function(err, res) {
@@ -341,35 +330,6 @@ function getUser(username, db, callback){
 
 //Check for unique email & username
 function checkInfo(email, username, db, callback){
-  // console.log("checkEmail: " + email);
-  // mongoClient.connect(url, function(err, db) {
-  //   if (err) throw err;
-
-  //   console.log("connect: " + email);
-	// 	var twitter = db.db("twitter");
-	// 	twitter.collection("users").findOne({$or: [{email: email}, {username: username}]}, function(err, res) {
-  //     if (err) throw err;
-
-  //     if(res !== null){
-  //       if(res.email === email){
-  //         var string = "Email already exists: " + res.email;
-  //         console.log(string);
-  //         callback(err, string);
-  //         db.close();
-  //       }else if(res.username === username){
-  //         var string = "Username already exists: " + res.username;
-  //         console.log(string);
-  //         callback(err, string);
-  //         db.close();
-  //       }
-  //     }else{
-  //       callback(err, undefined);
-  //     }
-
-  //     db.close();
-  //   });
-  // });
-
   var twitter = db.db("twitter");
   twitter.collection("users").findOne({$or: [{email: email}, {username: username}]}, function(err, res) {
     if (err) throw err;
@@ -392,30 +352,17 @@ function checkInfo(email, username, db, callback){
 
 //Add user to database
 function addNewUser(user, db, callback){
-  mongoClient.connect(url, function(err, db) {
-		if (err) throw err;		
-		var twitter = db.db("twitter");
-		twitter.collection("users").insertOne(user, function(err, res) {
-			if (err) throw err;
-      console.log("New user added to database: ", user);
-      callback(err, user.email);
-			db.close();
-		});
-	});
+  if (err) throw err;		
+  var twitter = db.db("twitter");
+  twitter.collection("users").insertOne(user, function(err, res) {
+    if (err) throw err;
+    console.log("New user added to database: ", user);
+    callback(err, user.email);
+  });
 }
 
 //Add item to database
 function addNewItem(item, db, callback){
-  // mongoClient.connect(url, function(err, db) {
-	// 	if (err) throw err;		
-	// 	var twitter = db.db("twitter");
-	// 	twitter.collection("items").insert(item, function(err, res) {
-  //     if (err) throw err;
-  //     console.log("New item added to database: ", res.insertedIds[0]);
-  //     callback(err, res.insertedIds[0]);
-	// 		db.close();
-	// 	});
-  // });
   var twitter = db.db("twitter");
   twitter.collection("items").insert(item, function(err, res) {
     if (err) throw err;
@@ -449,39 +396,33 @@ function sendVerification(email, key){
 }
 
 //Check if entered key matches emailed key
-function checkKey(email, key, callback){
-  mongoClient.connect(url, function(err, db) {
+function checkKey(email, key, db, callback){
+  if (err) throw err;
+  var twitter = db.db("twitter");
+  twitter.collection("users").findOne({email: email}, function(err, res) {
     if (err) throw err;
-	  var twitter = db.db("twitter");
-	  twitter.collection("users").findOne({email: email}, function(err, res) {
-      if (err) throw err;
-      console.log("checkKey res: ", res);
-      if(res !== null){
-        if(res.status !== key){
-          callback(err, "incorrect");
-        }else{
-          callback(err, undefined);
-        }
+    console.log("checkKey res: ", res);
+    if(res !== null){
+      if(res.status !== key){
+        callback(err, "incorrect");
       }else{
-        callback(err, "nonexistent");
+        callback(err, undefined);
       }
-      db.close();
-    });
+    }else{
+      callback(err, "nonexistent");
+    }
   });
 }
 
 //Update user's status to verified
-function verifyUser(email){
-  mongoClient.connect(url, function(err, db) {
+function verifyUser(email, db){
     if (err) throw err;		 
     var twitter = db.db("twitter");
     var newvalues = { $set: { status: "verified" } };
 	  twitter.collection("users").updateOne({email: email}, newvalues, function(err, res) {
       if (err) throw err;
       console.log("Verified user and updated db: ", email);
-        db.close();
-      });
-  });
+    });
 }
 
 //Update user's followers; either follow or unfollow (toggle boolean) the requested username
@@ -550,92 +491,77 @@ function followUser(username, current, follow, callback){
 
 
 //Check username & password & verification
-function checkLogin(username, password, callback){
-  mongoClient.connect(url, function(err, db) {
+function checkLogin(username, password, db, callback){
+  if (err) throw err;
+  var twitter = db.db("twitter");
+  twitter.collection("users").findOne({username: username}, function(err, res) {
     if (err) throw err;
-	  var twitter = db.db("twitter");
-	  twitter.collection("users").findOne({username: username}, function(err, res) {
-      if (err) throw err;
-      if(res !== null){
-        console.log("RESULT: ", res._id);
-        var status = res.status;
-        if(res.password !== password){
-          callback(err, "incorrect");
-        }else if(status !== "verified" && status !== "active" && status !== "inactive"){
-          callback(err, "unverified");
-        }else{
-          callback(err, undefined);
-        }
+    if(res !== null){
+      console.log("RESULT: ", res._id);
+      var status = res.status;
+      if(res.password !== password){
+        callback(err, "incorrect");
+      }else if(status !== "verified" && status !== "active" && status !== "inactive"){
+        callback(err, "unverified");
       }else{
-        callback(err, "null");
+        callback(err, undefined);
       }
-      db.close();
-    });
+    }else{
+      callback(err, "null");
+    }
   });
 }
 
-function getStatus(username, callback){
-  mongoClient.connect(url, function(err, db) {
+function getStatus(username, db, callback){
+  if (err) throw err;
+  var twitter = db.db("twitter");
+  twitter.collection("users").findOne({username: username}, function(err, res) {
     if (err) throw err;
-	  var twitter = db.db("twitter");
-	  twitter.collection("users").findOne({username: username}, function(err, res) {
-      if (err) throw err;
-      if(res !== null){
-        console.log("RESULT: ", res._id);
-        var status = res.status;
-        callback(err, status);
-      }else{
-        callback(err, "null");
-      }
-      db.close();
-    });
+    if(res !== null){
+      console.log("RESULT: ", res._id);
+      var status = res.status;
+      callback(err, status);
+    }else{
+      callback(err, "null");
+    }
   });
 }
 
-function getItem(id, callback){
-  mongoClient.connect(url, function(err, db) {
+function getItem(id, db, callback){
+  if (err) throw err;
+  var ObjectID = mongo.ObjectID;
+  var twitter = db.db("twitter");
+  var objectID = {"_id" : ObjectID(String(id))};
+  twitter.collection("items").findOne(objectID, function(err, res) {
     if (err) throw err;
-    var ObjectID = mongo.ObjectID;
-    var twitter = db.db("twitter");
-    var objectID = {"_id" : ObjectID(String(id))};
-	  twitter.collection("items").findOne(objectID, function(err, res) {
-      if (err) throw err;
-      callback(err, res);
-      db.close();
-    });
+    callback(err, res);
   });
 }
 
 //Delete item by ID
-function deleteItem(id, callback){
-  mongoClient.connect(url, function(err, db) {
+function deleteItem(id, db, callback){
+  if (err) throw err;
+  var ObjectID = mongo.ObjectID;
+  var twitter = db.db("twitter");
+  var objectID = {"_id" : ObjectID(String(id))};
+  twitter.collection("items").deleteOne(objectID, function(err, res) {
     if (err) throw err;
-    var ObjectID = mongo.ObjectID;
-    var twitter = db.db("twitter");
-    var objectID = {"_id" : ObjectID(String(id))};
-	  twitter.collection("items").deleteOne(objectID, function(err, res) {
-      if (err) throw err;
-      callback(err, res);
-      db.close();
-    });
+    callback(err, res);
   });
 }
 
 // Search for <limit> newest number of items from <timestamp> and return the array of items
-function searchByTimestamp(timestamp, limit, callback){
-  mongoClient.connect(url, function(err, db) {
-		if (err) throw err;		
-    var twitter = db.db("twitter");
-    console.log("timestamp:", timestamp);
-    console.log("limit:", limit);
-    var options = {"limit":limit};
-		twitter.collection("items").find({"timestamp":{$gte:timestamp}}, options).toArray(function(err, items_found) {
-			if (err) throw err;
-      console.log("items found: ", items_found);
-      callback(err, items_found);
-			db.close();
-		});
-	});
+function searchByTimestamp(timestamp, limit, db, callback){
+  if (err) throw err;		
+  var twitter = db.db("twitter");
+  console.log("timestamp:", timestamp);
+  console.log("limit:", limit);
+  var options = {"limit":limit};
+  twitter.collection("items").find({"timestamp":{$gte:timestamp}}, options).toArray(function(err, items_found) {
+    if (err) throw err;
+    console.log("items found: ", items_found);
+    callback(err, items_found);
+  });
 }
 
 module.exports = router;
