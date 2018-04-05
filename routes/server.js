@@ -7,14 +7,17 @@ var url = "mongodb://localhost";
 var nodemailer = require('nodemailer');
 var rand = require('generate-key');
 var session = require('express-session');
-
-var count = 0;
-
 router.use(session({
   secret: 'foo',  
   resave: false,
   saveUninitialized: false
 }));
+
+var tq = require('task-queue');
+var queue = tq.Queue({capacity: 100, concurrency: 1});
+queue.start();
+
+var count = 0; 
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -165,12 +168,17 @@ router.post('/additem', function(req, res){
       check if logged in using session cookie
     */
     var timestamp = new Date().toISOString();
-    var item = {username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
+    var item = {index: count, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
     
-    addNewItem(item, req.db, function(err, id){
-      console.log("id returned: " + id);
-      res.send({status: "OK", id: id});
-    });
+    console.log("added insert to queue - total: " + count);
+    queue.enqueue(addNewItem, {args: [item, req.db]});
+
+    count++;
+    res.send({status: "OK", id: count});
+    // addNewItem(item, req.db, function(err, id){
+    //   console.log("id returned: " + id);
+    //   res.send({status: "OK", id: id});
+    // });
   }
   
 
@@ -364,12 +372,12 @@ function addNewUser(user, db, callback){
 }
 
 //Add item to database
-function addNewItem(item, db, callback){
+function addNewItem(item, db){
   var twitter = db.db("twitter");
   twitter.collection("items").insert(item, function(err, res) {
     if (err) throw err;
     console.log("New item added to database: ", res.insertedIds[0]);
-    callback(err, res.insertedIds[0]);
+    // callback(err, res.insertedIds[0]);
   });
 }
 
