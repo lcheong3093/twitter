@@ -335,7 +335,6 @@ function getUser(username, db, callback){
   twitter.collection("users").findOne({username: username}, function(err, res) {
     if (err) throw err;
     callback(err, res);
-    db.close();
   });
 }
 
