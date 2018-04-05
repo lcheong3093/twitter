@@ -256,7 +256,7 @@ router.get('/user/:username/followers', function(req, res){
   var limit = 50;
   if (req.body.limit > 0 && req.body.limit <= 200)
     limit = req.body.limit;
-  getUser(username, function(err, ret){
+  getUser(username, req.db, function(err, ret){
     if(ret === null){
       console.log("could not find user: " + username);
       res.send({status: "error"});
@@ -273,7 +273,7 @@ router.get('/user/:username/following', function(req, res){
   var limit = 50;
   if (req.body.limit > 0 && req.body.limit <= 200)
     limit = req.body.limit;
-  getUser(username, function(err, ret){
+  getUser(username, req.db, function(err, ret){
     if(ret === null){
       console.log("could not find user: " + username);
       res.send({status: "error"});
