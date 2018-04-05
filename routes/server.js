@@ -14,7 +14,7 @@ router.use(session({
 }));
 
 var tq = require('task-queue');
-var queue = tq.Queue({capacity: 100, concurrency: 1});
+var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
 
 var count = 0;
