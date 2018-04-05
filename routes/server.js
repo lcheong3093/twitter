@@ -219,18 +219,11 @@ router.post('/search', function(req, res){
         query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
     }
   } 
-  console.log("query with req.body overwrites: ", query);
-
-  // if (Number.isNaN(req.body.limit)) {
-  //   console.log("limit is NaN");
-  //   query[limit] = 25;
-  // }
   console.log("search: ", query);
   // searchByTimestamp(timestamp, limit, q, username, following, req.db, function(err, items){
   //   res.send({status: "OK", items: items}); // items is an array of item objects
   //   // res.send({status:"error"});
   // });
-
   search(query, limit, req.session.username, req.db, function(err, items){
     res.send({status: "OK", items: items}); // items is an array of item objects
     // res.send({status:"error"});
