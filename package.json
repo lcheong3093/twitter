@@ -10,15 +10,14 @@
     "cookie-parser": "~1.4.3",
     "cookie-session": "^2.0.0-beta.3",
     "debug": "~2.6.9",
-    "ejs": "~2.5.7",
+    "ejs": "^2.5.8",
     "express": "~4.15.5",
     "express-mongo-db": "^2.0.4",
     "express-session": "^1.15.6",
     "generate-key": "0.0.6",
-    "mongodb": "^3.0.4",
+    "mongodb": "^3.0.5",
     "morgan": "~1.9.0",
-    "nodemailer": "^4.6.3",
-    "serve-favicon": "~2.4.5",
-    "task-queue": "^1.0.2"
+    "nodemailer": "^4.6.4",
+    "serve-favicon": "~2.4.5"
   }
 }
