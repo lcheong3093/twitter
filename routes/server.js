@@ -206,18 +206,21 @@ router.post('/search', function(req, res){
 
   for(var key in req.body){ 
     if(req.body[key] !== "")
-      query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
-  } 
-  console.log("query req.body overwrites: ", query);
-
-  if (Number.isNaN(req.body.limit)) {  //special case (?) for limit to parseInt and error check
-    query[limit] = 25; // default
-  } else {
-    query[limit] = parseInt(req.body.limit);
-    if (query[limit] > 100) {
-      res.send({status: "error", error: "Limit must be maximum of 100"});
+      if (key == "limit") {
+        if (Number.isNaN(req.body.key)) {  //special case (?) for limit to parseInt and error check
+          query[key] = 25; // default
+        } else {
+          query[key] = parseInt(req.body.key);
+          if (query[key] > 100) {
+            res.send({status: "error", error: "Limit must be maximum of 100"});
+          }
+        }
+      } else {
+        query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
     }
-  }
+  } 
+  console.log("query with req.body overwrites: ", query);
+
   // if (Number.isNaN(req.body.limit)) {
   //   console.log("limit is NaN");
   //   query[limit] = 25;
