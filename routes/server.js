@@ -567,9 +567,11 @@ function search(query, limit, current, db, callback){
     newq = {username: query.username, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
   }
 
-  
+  newq = {$and: [{username: query.username}, {timestamp: query.timestamp}, {content: {$regex: query.q}}]};
 
-  twitter.collection("items").find({newq, "timestamp":{$gte:query.timestamp}}, options).toArray(function(err, items_found) {
+  console.log("queery: ". newq);
+  
+  twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
     if (err) throw err;
     console.log("items found: ", items_found);
     callback(err, items_found);
