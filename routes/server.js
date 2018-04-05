@@ -13,9 +13,11 @@ router.use(session({
   saveUninitialized: false
 }));
 
+console.log("does it break here?");
 var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
+console.log("too many queues?");
 
 var count = 0;
 
