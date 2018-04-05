@@ -40,7 +40,7 @@ router.post('/adduser', function(req, res) {
   }
 
   console.log("User: " + username + " Email: " + email + " Pass: " + password);
-  checkInfo(email, username, function(err, string){
+  checkInfo(email, username, req.db, function(err, string){
     if(err){ 
       throw err;
       res.send({status: "error"});
@@ -54,7 +54,7 @@ router.post('/adduser', function(req, res) {
       var empty = [];
       // Maybe followers/following lists should be Sets instead, so there can't be duplicates. not sure
       var user = {email: email, username: username, password: password, status: key, followers: [], following: []};
-      addNewUser(user, function(err, email){
+      addNewUser(user, req.db, function(err, email){
         console.log("key: " + user.status);
         sendVerification(email, user.status);
         // res.render('verify', {key: key, email: email});
@@ -113,6 +113,8 @@ router.post('/login', function(req, res){
             db.close();
           });
       });
+
+      
 
       //SESSION COOKIE
       if (username !== undefined){
@@ -237,7 +239,7 @@ router.get('/user/:username', function(req, res){
   var username = req.params.username;
   console.log("get user info: " + username);
 
-  getUser(username, function(err, ret){
+  getUser(username, ,req.db, function(err, ret){
     if(ret === null){
       console.log("could not find user: " + username);
       res.send({status: "error"});
@@ -316,54 +318,81 @@ router.post('/follow', function(req, res){
 
 
 //Get user object with username
-function getUser(username, callback){
-  mongoClient.connect(url, function(err, db) {
+function getUser(username, db, callback){
+  // mongoClient.connect(url, function(err, db) {
+  //   if (err) throw err;
+  //   var ObjectID = mongo.ObjectID;
+  //   var twitter = db.db("twitter");
+	//   twitter.collection("users").findOne({username: username}, function(err, res) {
+  //     if (err) throw err;
+  //     callback(err, res);
+  //     db.close();
+  //   });
+  // });
+
+  var ObjectID = mongo.ObjectID;
+  var twitter = db.db("twitter");
+  twitter.collection("users").findOne({username: username}, function(err, res) {
     if (err) throw err;
-    var ObjectID = mongo.ObjectID;
-    var twitter = db.db("twitter");
-	  twitter.collection("users").findOne({username: username}, function(err, res) {
-      if (err) throw err;
-      callback(err, res);
-      db.close();
-    });
+    callback(err, res);
+    db.close();
   });
 }
 
 
 //Check for unique email & username
-function checkInfo(email, username, callback){
+function checkInfo(email, username, db, callback){
   // console.log("checkEmail: " + email);
-  mongoClient.connect(url, function(err, db) {
+  // mongoClient.connect(url, function(err, db) {
+  //   if (err) throw err;
+
+  //   console.log("connect: " + email);
+	// 	var twitter = db.db("twitter");
+	// 	twitter.collection("users").findOne({$or: [{email: email}, {username: username}]}, function(err, res) {
+  //     if (err) throw err;
+
+  //     if(res !== null){
+  //       if(res.email === email){
+  //         var string = "Email already exists: " + res.email;
+  //         console.log(string);
+  //         callback(err, string);
+  //         db.close();
+  //       }else if(res.username === username){
+  //         var string = "Username already exists: " + res.username;
+  //         console.log(string);
+  //         callback(err, string);
+  //         db.close();
+  //       }
+  //     }else{
+  //       callback(err, undefined);
+  //     }
+
+  //     db.close();
+  //   });
+  // });
+
+  var twitter = db.db("twitter");
+  twitter.collection("users").findOne({$or: [{email: email}, {username: username}]}, function(err, res) {
     if (err) throw err;
 
-    console.log("connect: " + email);
-		var twitter = db.db("twitter");
-		twitter.collection("users").findOne({$or: [{email: email}, {username: username}]}, function(err, res) {
-      if (err) throw err;
-
-      if(res !== null){
-        if(res.email === email){
-          var string = "Email already exists: " + res.email;
-          console.log(string);
-          callback(err, string);
-          db.close();
-        }else if(res.username === username){
-          var string = "Username already exists: " + res.username;
-          console.log(string);
-          callback(err, string);
-          db.close();
-        }
-      }else{
-        callback(err, undefined);
+    if(res !== null){
+      if(res.email === email){
+        var string = "Email already exists: " + res.email;
+        console.log(string);
+        callback(err, string);
+      }else if(res.username === username){
+        var string = "Username already exists: " + res.username;
+        console.log(string);
+        callback(err, string);
       }
-
-      db.close();
-    });
+    }else{
+      callback(err, undefined);
+    }
   });
 }
 
 //Add user to database
-function addNewUser(user, callback){
+function addNewUser(user, db, callback){
   mongoClient.connect(url, function(err, db) {
 		if (err) throw err;		
 		var twitter = db.db("twitter");
@@ -393,7 +422,6 @@ function addNewItem(item, db, callback){
     if (err) throw err;
     console.log("New item added to database: ", res.insertedIds[0]);
     callback(err, res.insertedIds[0]);
-    db.close();
   });
 }
 
