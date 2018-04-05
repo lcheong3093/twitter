@@ -191,7 +191,7 @@ router.get('/item/:id', function(req, res){
 // Search for items by timestamp. 
 router.post('/search', function(req, res){
   //Gets a list of the latest <limit> number of items prior to (and including) the provided <timestamp>
-  var timestamp = Date.now(); // int: return items from this date and earlier
+  var timestamp = new Date().toISOString(); // int: return items from this date and earlier
   var limit = 25; //int: number of items to return
   var q = "";  //string: only return items that match (or contain? not sure) the search query (supports spaces)
   var username = "";  //string: only return items by this username
@@ -203,10 +203,11 @@ router.post('/search', function(req, res){
     query[opt] = defaults[opt]; //set up query with defaults
   }
   for(var key in req.body){ 
-    query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
-  }
+    if(req.body[key] !== "")
+      query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
+  } 
 
-  if (req.body.limit === undefined || req.body.limit === null) {  //special case (?) for limit to parseInt and error check
+  if (req.body.limit === "") {  //special case (?) for limit to parseInt and error check
     query.limit = 25; // default
   } else {
     query.limit = parseInt(req.body.limit);
@@ -215,6 +216,7 @@ router.post('/search', function(req, res){
     }
   }
 
+  console.log("search: ", query);
   // searchByTimestamp(timestamp, limit, q, username, following, req.db, function(err, items){
   //   res.send({status: "OK", items: items}); // items is an array of item objects
   //   // res.send({status:"error"});
@@ -549,7 +551,7 @@ function searchByTimestamp(timestamp, limit, db, callback){
   });
 }
 
-function search(query, limit, following, callback){
+function search(query, limit, db, callback){
   var twitter = db.db("twitter");
   console.log("SEARCHING.......")
 
