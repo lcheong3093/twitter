@@ -118,13 +118,14 @@ router.post('/login', function(req, res){
         console.log("User logged in and updated db: ", username);
       });
 
-      
-
       //SESSION COOKIE
       if (username !== undefined){
         console.log("set cookie");
-        req.session.username = username;
+      }else{
+        console.log("someone else is logged on...replacing current user");
       }
+
+      req.session.username = username;
 
       // res.send({status: "OK"});
       //RENDER FEED
@@ -178,10 +179,6 @@ router.post('/additem', function(req, res){
     count++;
 
     console.log("added insert to queue - total: " + count);
-    // addNewItem(item, req.db, function(err, id){
-    //   console.log("id returned: " + id);
-    //   res.send({status: "OK", id: id});
-    // });
   }
   
 
@@ -218,8 +215,6 @@ router.post('/search', function(req, res){
     // res.send({status:"error"});
   });
 });
-
-///alsjdflkjsadlf
 
 /***
  * 
