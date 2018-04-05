@@ -27,6 +27,7 @@ router.get('/', function(req, res, next) {
 
 /* Create Account */
 router.post('/adduser', function(req, res) {
+  console.log("hello????????");
   var username = req.body.username;
   var email = req.body.email;
   var password = req.body.password;
