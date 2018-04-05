@@ -94,6 +94,7 @@ router.post('/login', function(req, res){
   var username = req.body.username;
   var password = req.body.password;
 
+  console.log(username + " logging in");
   checkLogin(username, password, req.db, function(err, string){
     if(string !== undefined){
       console.log("login string:", string);
@@ -110,7 +111,7 @@ router.post('/login', function(req, res){
     }else{
       //Update status of user
       if (err) throw err;		 
-      var twitter = db.db("twitter");
+      var twitter = req.db.db("twitter");
       var newvalues = { $set: { status: "active" } };
       twitter.collection("users").updateOne({username: username}, newvalues, function(err, res) {
         if (err) throw err;
@@ -125,9 +126,9 @@ router.post('/login', function(req, res){
         req.session.username = username;
       }
 
-      res.send({status: "OK"});
+      // res.send({status: "OK"});
       //RENDER FEED
-      // res.render('feed');
+      res.render('feed');
     }
   });
 });
@@ -170,11 +171,13 @@ router.post('/additem', function(req, res){
     var timestamp = new Date().toISOString();
     var item = {index: count, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
     
-    console.log("added insert to queue - total: " + count);
     queue.enqueue(addNewItem, {args: [item, req.db]});
 
-    count++;
     res.send({status: "OK", id: count});
+
+    count++;
+
+    console.log("added insert to queue - total: " + count);
     // addNewItem(item, req.db, function(err, id){
     //   console.log("id returned: " + id);
     //   res.send({status: "OK", id: id});
@@ -502,7 +505,7 @@ function followUser(username, current, follow, callback){
 
 //Check username & password & verification
 function checkLogin(username, password, db, callback){
-  if (err) throw err;
+  console.log("askdjfk");
   var twitter = db.db("twitter");
   twitter.collection("users").findOne({username: username}, function(err, res) {
     if (err) throw err;
