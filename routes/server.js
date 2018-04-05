@@ -127,9 +127,9 @@ router.post('/login', function(req, res){
 
       req.session.username = username;
 
-      // res.send({status: "OK"});
+      res.send({status: "OK"});
       //RENDER FEED
-      res.render('feed');
+      // res.render('feed');
     }
   });
 });
@@ -360,7 +360,6 @@ function checkInfo(email, username, db, callback){
 
 //Add user to database
 function addNewUser(user, db, callback){
-  if (err) throw err;		
   var twitter = db.db("twitter");
   twitter.collection("users").insertOne(user, function(err, res) {
     if (err) throw err;
