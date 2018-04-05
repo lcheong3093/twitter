@@ -187,7 +187,7 @@ router.post('/additem', function(req, res){
 
 /* Get Item by ID */
 router.get('/item/:id', function(req, res){
-    var id = parseInt(req.params.id);
+    var id = req.params.id;
     console.log("GET item by ID-- req.params.id: " + id);
 
     getItem(id, req.db, function(err, item){
@@ -253,7 +253,7 @@ router.post('/search', function(req, res){
 // Delete item given an ID
 router.delete('/item/:id', function(req, res){
   // TODO -- make sure that the current user owns the tweet to be deleted
-  var id = parseInt(req.params.id);
+  var id = req.params.id;
   console.log("DELETE item by ID-- req.params.id: " + id);
   //send HTTP status code of 200 for OK, anything else for failure
   deleteItem(id, req.db, function(err, item){
