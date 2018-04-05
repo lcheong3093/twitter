@@ -186,7 +186,7 @@ router.post('/additem', function(req, res){
 
 /* Get Item by ID */
 router.get('/item/:id', function(req, res){
-    var id = req.params.id;
+    var id = parseInt(req.params.id);
     console.log("GET item by ID-- req.params.id: " + id);
 
     getItem(id, req.db, function(err, item){
