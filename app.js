@@ -5,7 +5,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var expressMongoDb = require('express-mongo-db');
-app.use(expressMongoDb('mongodb://localhost'));
 
 var server = require('./routes/server');
 var users = require('./routes/users');
@@ -23,6 +22,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(expressMongoDb('mongodb://localhost'));
 
 app.use('/', server);
 app.use('/users', users);
