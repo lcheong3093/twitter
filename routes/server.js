@@ -3,6 +3,7 @@ var router = express.Router();
 var mongo = require('mongodb');
 var mongoClient = mongo.MongoClient;
 var url = "mongodb://localhost"
+
 var nodemailer = require('nodemailer');
 var rand = require('generate-key');
 var session = require('express-session')
@@ -164,7 +165,7 @@ router.post('/additem', function(req, res){
     var timestamp = new Date().toISOString();
     var item = {username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
     
-    addNewItem(item, function(err, id){
+    addNewItem(item, req.db, function(err, id){
       console.log("id returned: " + id);
       res.send({status: "OK", id: id});
     });
@@ -376,17 +377,24 @@ function addNewUser(user, callback){
 }
 
 //Add item to database
-function addNewItem(item, callback){
-  mongoClient.connect(url, function(err, db) {
-		if (err) throw err;		
-		var twitter = db.db("twitter");
-		twitter.collection("items").insert(item, function(err, res) {
-      if (err) throw err;
-      console.log("New item added to database: ", res.insertedIds[0]);
-      callback(err, res.insertedIds[0]);
-			db.close();
-		});
-	});
+function addNewItem(item, db, callback){
+  // mongoClient.connect(url, function(err, db) {
+	// 	if (err) throw err;		
+	// 	var twitter = db.db("twitter");
+	// 	twitter.collection("items").insert(item, function(err, res) {
+  //     if (err) throw err;
+  //     console.log("New item added to database: ", res.insertedIds[0]);
+  //     callback(err, res.insertedIds[0]);
+	// 		db.close();
+	// 	});
+  // });
+  var twitter = db.db("twitter");
+  twitter.collection("items").insert(item, function(err, res) {
+    if (err) throw err;
+    console.log("New item added to database: ", res.insertedIds[0]);
+    callback(err, res.insertedIds[0]);
+    db.close();
+  });
 }
 
 //Send verification email w/ key
