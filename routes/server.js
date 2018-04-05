@@ -27,7 +27,6 @@ router.get('/', function(req, res, next) {
 
 /* Create Account */
 router.post('/adduser', function(req, res) {
-  console.log("hello????????");
   var username = req.body.username;
   var email = req.body.email;
   var password = req.body.password;
@@ -223,7 +222,7 @@ router.post('/search', function(req, res){
   //   // res.send({status:"error"});
   // });
 
-  search(query, limit, req.db, function(err, items){
+  search(query, limit, req.session.username, req.db, function(err, items){
     res.send({status: "OK", items: items}); // items is an array of item objects
     // res.send({status:"error"});
   });
@@ -387,7 +386,7 @@ function sendVerification(email, key){
 		port: 465,
 		secure: true,
 		auth: {
-		  user: 'tttcse356@gmail.com',
+		  user: 'twittercloud356@gmail.com',
 		  pass: '2COMESafter1'
 		}
   });
@@ -552,12 +551,23 @@ function searchByTimestamp(timestamp, limit, db, callback){
   });
 }
 
-function search(query, limit, db, callback){
+function search(query, limit, current, db, callback){
   var twitter = db.db("twitter");
-  console.log("SEARCHING.......")
+  console.log("SEARCHING.......");
 
   var options = {"limit":limit};
-  twitter.collection("items").find({query, "timestamp":{$gte:query.timestamp}}, options).toArray(function(err, items_found) {
+  
+  var newq;
+
+  if(following === true){
+    newq = {username: {$ne: current}, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
+  }else{
+    newq = {username: username, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
+  }
+
+  
+
+  twitter.collection("items").find({newq, "timestamp":{$gte:query.timestamp}}, options).toArray(function(err, items_found) {
     if (err) throw err;
     console.log("items found: ", items_found);
     callback(err, items_found);
