@@ -404,7 +404,6 @@ function sendVerification(email, key){
 
 //Check if entered key matches emailed key
 function checkKey(email, key, db, callback){
-  if (err) throw err;
   var twitter = db.db("twitter");
   twitter.collection("users").findOne({email: email}, function(err, res) {
     if (err) throw err;
@@ -520,7 +519,6 @@ function checkLogin(username, password, db, callback){
 }
 
 function getStatus(username, db, callback){
-  if (err) throw err;
   var twitter = db.db("twitter");
   twitter.collection("users").findOne({username: username}, function(err, res) {
     if (err) throw err;
@@ -535,7 +533,6 @@ function getStatus(username, db, callback){
 }
 
 function getItem(id, db, callback){
-  if (err) throw err;
   var ObjectID = mongo.ObjectID;
   var twitter = db.db("twitter");
   var objectID = {"_id" : ObjectID(String(id))};
@@ -547,7 +544,6 @@ function getItem(id, db, callback){
 
 //Delete item by ID
 function deleteItem(id, db, callback){
-  if (err) throw err;
   var ObjectID = mongo.ObjectID;
   var twitter = db.db("twitter");
   var objectID = {"_id" : ObjectID(String(id))};
@@ -559,7 +555,6 @@ function deleteItem(id, db, callback){
 
 // Search for <limit> newest number of items from <timestamp> and return the array of items
 function searchByTimestamp(timestamp, limit, db, callback){
-  if (err) throw err;		
   var twitter = db.db("twitter");
   console.log("timestamp:", timestamp);
   console.log("limit:", limit);
