@@ -252,10 +252,11 @@ router.post('/search', function(req, res){
 // Delete item given an ID
 router.delete('/item/:id', function(req, res){
   // TODO -- make sure that the current user owns the tweet to be deleted
-  var id = req.params.id;
+  var id = parseInt(req.params.id);
   console.log("DELETE item by ID-- req.params.id: " + id);
   //send HTTP status code of 200 for OK, anything else for failure
   deleteItem(id, req.db, function(err, item){
+    console.log("hello?");
     if(err !== null){
       console.log("error; (possibly) could not find item");
       res.sendStatus(500);
@@ -352,7 +353,6 @@ router.post('/follow', function(req, res){
 
 //Get user object with username
 function getUser(username, db, callback){
-  var ObjectID = mongo.ObjectID;
   var twitter = db.db("twitter");
   twitter.collection("users").findOne({username: username}, function(err, res) {
     if (err) throw err;
@@ -557,9 +557,7 @@ function getStatus(username, db, callback){
 }
 
 function getItem(id, db, callback){
-  var ObjectID = mongo.ObjectID;
   var twitter = db.db("twitter");
-  // var objectID = {"_id" : ObjectID(String(id))};
   twitter.collection("items").findOne({index: id}, function(err, res) {
     if (err) throw err;
     callback(err, res);
@@ -568,10 +566,8 @@ function getItem(id, db, callback){
 
 //Delete item by ID
 function deleteItem(id, db, callback){
-  var ObjectID = mongo.ObjectID;
   var twitter = db.db("twitter");
-  var objectID = {"_id" : ObjectID(String(id))};
-  twitter.collection("items").deleteOne(objectID, function(err, res) {
+  twitter.collection("items").deleteOne({index: id}, function(err, res) {
     if (err) throw err;
     callback(err, res);
   });
