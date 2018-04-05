@@ -387,7 +387,7 @@ function sendVerification(email, key){
 		secure: true,
 		auth: {
 		  user: 'twittercloud356@gmail.com',
-		  pass: 'kerfuffle3633*'
+		  pass: 'twoCOMESafterONE'
 		}
   });
   var mailOpts = {
