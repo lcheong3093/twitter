@@ -215,7 +215,12 @@ router.post('/search', function(req, res){
     }
   }
 
-  searchByTimestamp(timestamp, limit, q, username, following, req.db, function(err, items){
+  // searchByTimestamp(timestamp, limit, q, username, following, req.db, function(err, items){
+  //   res.send({status: "OK", items: items}); // items is an array of item objects
+  //   // res.send({status:"error"});
+  // });
+
+  search(query, limit, req.db, function(err, items){
     res.send({status: "OK", items: items}); // items is an array of item objects
     // res.send({status:"error"});
   });
@@ -544,12 +549,12 @@ function searchByTimestamp(timestamp, limit, db, callback){
   });
 }
 
-function search(timestamp, limit, query, username, following, callback){
+function search(query, limit, following, callback){
   var twitter = db.db("twitter");
-  
   console.log("SEARCHING.......")
+
   var options = {"limit":limit};
-  twitter.collection("items").find({"timestamp":{$gte:timestamp}}, options).toArray(function(err, items_found) {
+  twitter.collection("items").find({query, "timestamp":{$gte:query.timestamp}}, options).toArray(function(err, items_found) {
     if (err) throw err;
     console.log("items found: ", items_found);
     callback(err, items_found);
