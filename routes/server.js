@@ -17,7 +17,7 @@ var tq = require('task-queue');
 var queue = tq.Queue({capacity: 100, concurrency: 1});
 queue.start();
 
-var count = 0; 
+var count = 0;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -170,11 +170,12 @@ router.post('/additem', function(req, res){
       check if logged in using session cookie
     */
     var timestamp = new Date().toISOString();
-    var item = {index: count, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
+    var id = rand.generateKey();
+    var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
     
     queue.enqueue(addNewItem, {args: [item, req.db]});
 
-    res.send({status: "OK", id: count});
+    res.send({status: "OK", id: id});
 
     count++;
 
