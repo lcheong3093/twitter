@@ -605,7 +605,7 @@ function search(query, limit, following, current, db, callback){
 
       usernames = [];
       for(var follower in followers){
-        console.log("pushing: " + follower);
+        console.log("pushing: " + followers[0]);
         usernames.push({username: follower});
       }
 
