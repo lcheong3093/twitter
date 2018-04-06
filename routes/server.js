@@ -224,15 +224,15 @@ router.post('/search', function(req, res){
     res.send({status: "error", error: "Max limit is 100"});
   }else{
     for(var field in req.body){
-      if(req.body[field] !== "" && req.body[field] !== limit){ //Add given queries into query
+      if(req.body[field] !== "" && field !== "limit" && field !== "timestamp"){ //Add given queries into query
         if(field === "timestamp"){
-          query[field] = {$lte: field};
+          // query[field] = {$lte: field};
         }else{
           query[field] = req.body[field];
         }
       }else{
         if(field === "timestamp"){
-          query[field] = {$lte: timestamp};
+          // query[field] = {$lte: timestamp};
         }else if(field === "following"){
           query[field] = true;
         }
