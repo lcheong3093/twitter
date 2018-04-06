@@ -611,7 +611,8 @@ function search(query, limit, following, current, db, callback){
         usernames.push({username: followers[0]});
       }
       
-      usernames.push(query.username);
+      if(query.username !== undefined)
+        usernames.push({username: query.username});
 
       console.log("new query: ", newq);
       console.log("usernames: ", usernames);
