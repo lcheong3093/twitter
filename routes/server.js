@@ -579,7 +579,7 @@ function searchByTimestamp(timestamp, limit, db, callback){
 function search(query, limit, current, db, callback){
   var twitter = db.db("twitter");
 
-  var options = {"limit":limit};
+  var options = {"limit":parseInt(limit)};
   
   // var newq;
   console.log("SEARCHING....");
