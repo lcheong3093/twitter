@@ -207,6 +207,8 @@ router.post('/search', function(req, res){
       if(req.body[field] !== "" && field !== "limit" && field !== "following"){ //Add given queries into query
         if(field === "timestamp"){
           query[field] = {$lte: field};
+        }else if(field === "q"){
+          query[field] = {$regex: q};
         }else{
           query[field] = req.body[field];
         }
