@@ -582,7 +582,7 @@ function search(query, limit, current, db, callback){
   var options = {"limit":limit};
   
   // var newq;
-
+  console.log("SEARCHING....");
   // if(following === true){
   //   newq = {username: {$ne: current}, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
   // }else{
@@ -593,7 +593,7 @@ function search(query, limit, current, db, callback){
 
   // console.log("queery: ". newq);
   
-  twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
+  twitter.collection("items").find(query, options).toArray(function(err, items_found) {
     if (err) throw err;
     console.log("items found: ", items_found);
     callback(err, items_found);
