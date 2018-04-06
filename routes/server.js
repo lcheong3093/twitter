@@ -609,8 +609,9 @@ function search(query, limit, following, current, db, callback){
       }
 
       newq.username = {$or: usernames};
-      
+
       console.log("new query: ", newq);
+      console.log("usernames: ", usernames);
       twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
         if (err) throw err;
         // console.log("items found: ", items_found);
