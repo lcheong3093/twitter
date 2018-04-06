@@ -165,10 +165,9 @@ router.post('/additem', function(req, res){
     var timestamp = new Date().toISOString();
     var id = rand.generateKey();
     var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
-    queue.enqueue(addNewItem, {args: [item, req.db]});
     res.send({status: "OK", id: id});
-    count++;
-    console.log("added insert to queue - total: " + count);
+
+    queue.enqueue(addNewItem, {args: [item, req.db]});
   }
 });
 
@@ -199,6 +198,7 @@ router.post('/search', function(req, res){
   var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
   var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
 
+  console.log("req.body ----> username: " + req.body.username + " timestamp: " + req.body.timestamp + " q: " + req.body.q + " limit: " + req.body.limit + " following: " + req.body.following);
   for(var opt in defaults){ 
     query[opt] = defaults[opt]; //set up query with defaults
   }
