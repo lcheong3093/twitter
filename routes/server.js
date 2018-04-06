@@ -227,6 +227,14 @@ router.post('/search', function(req, res){
       else{
         query[field] = req.body[field];
       }
+    }else{
+      if(field === "limit"){
+        query[field] = 25;
+      }else if(field === "timestamp"){
+        query[field] = timestamp;
+      }else if(field === "following"){
+        query[field] = true;
+      }
     }
   }
   console.log("search: ", query);
