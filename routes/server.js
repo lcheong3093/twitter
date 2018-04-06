@@ -225,7 +225,11 @@ router.post('/search', function(req, res){
   }else{
     for(var field in req.body){
       if(req.body[field] !== ""){ //Add given queries into query
-        query[field] = req.body[field];
+        if(field === "timestamp"){
+          query[field] = {$gte: field};
+        }else{
+          query[field] = req.body[field];
+        }
       }else{
         if(field === "timestamp"){
           query[field] = timestamp;
@@ -234,6 +238,11 @@ router.post('/search', function(req, res){
         }
       }
     }
+
+    if(Number.isNaN(req.body.limit)){
+      limit = 25;
+    }
+
     console.log("search: ", query);
     
     search(query, limit, req.session.username, req.db, function(err, items){
@@ -569,21 +578,20 @@ function searchByTimestamp(timestamp, limit, db, callback){
 
 function search(query, limit, current, db, callback){
   var twitter = db.db("twitter");
-  console.log("SEARCHING.......");
 
   var options = {"limit":limit};
   
-  var newq;
+  // var newq;
 
-  if(following === true){
-    newq = {username: {$ne: current}, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
-  }else{
-    newq = {username: query.username, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
-  }
+  // if(following === true){
+  //   newq = {username: {$ne: current}, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
+  // }else{
+  //   newq = {username: query.username, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
+  // }
 
-  newq = {username: query.username, timestamp: query.timestamp, content: {$regex: query.q}};
+  // newq = {username: query.username, timestamp: query.timestamp, content: {$regex: query.q}};
 
-  console.log("queery: ". newq);
+  // console.log("queery: ". newq);
   
   twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
     if (err) throw err;
