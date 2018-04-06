@@ -207,8 +207,6 @@ router.post('/search', function(req, res){
       if(req.body[field] !== "" && field !== "limit" && field !== "following"){ //Add given queries into query
         if(field === "timestamp"){
           query[field] = {$lte: field};
-        }else if(field === "q"){
-          query[field] = {$regex: q};
         }else{
           query[field] = req.body[field];
         }
@@ -580,8 +578,8 @@ function search(query, limit, following, current, db, callback){
 
   if(following === true){
     for(var que in query){
-      if(que !== "username");
-      newq[que] = query[que];
+      if(que !== "username" && que !== "q")
+        newq[que] = query[que];
     }
 
     getFollowers(current, db, function(err, followers){
@@ -598,7 +596,7 @@ function search(query, limit, following, current, db, callback){
 
       console.log("new query: ", newq);
       console.log("usernames: ", usernames);
-      twitter.collection("items").find({$or: usernames}, newq, options).toArray(function(err, items_found) {
+      twitter.collection("items").find({$or: usernames}, {content: {$regex: q}}, newq, options).toArray(function(err, items_found) {
         if (err) throw err;
         // console.log("items found: ", items_found);
         callback(err, items_found);
