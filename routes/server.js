@@ -220,32 +220,28 @@ router.post('/search', function(req, res){
   //     }
   //   }
   // } 
-  for(var field in req.body){
-    if(req.body[field] !== "" && !Number.isNaN(req.body[field])){ //Add given queries into query
-      if(field === "limit")
-        query[field] = parseInt(req.body.limit);
-      else{
+  if(req.body.limit > 100){
+    res.send({status: "error", error: "Max limit is 100"});
+  }else{
+    for(var field in req.body){
+      if(req.body[field] !== ""){ //Add given queries into query
         query[field] = req.body[field];
-      }
-    }else{
-      if(field === "limit"){
-        query[field] = 25;
-      }else if(field === "timestamp"){
-        query[field] = timestamp;
-      }else if(field === "following"){
-        query[field] = true;
+      }else{
+        if(field === "timestamp"){
+          query[field] = timestamp;
+        }else if(field === "following"){
+          query[field] = true;
+        }
       }
     }
+    console.log("search: ", query);
+    
+    search(query, limit, req.session.username, req.db, function(err, items){
+      res.send({status: "OK", items: items}); // items is an array of item objects
+      // res.send({status:"error"});
+    });
   }
-  console.log("search: ", query);
-  // searchByTimestamp(timestamp, limit, q, username, following, req.db, function(err, items){
-  //   res.send({status: "OK", items: items}); // items is an array of item objects
-  //   // res.send({status:"error"});
-  // });
-  search(query, limit, req.session.username, req.db, function(err, items){
-    res.send({status: "OK", items: items}); // items is an array of item objects
-    // res.send({status:"error"});
-  });
+  
 });
 
 /***
