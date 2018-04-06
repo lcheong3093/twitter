@@ -603,7 +603,13 @@ function search(query, limit, following, current, db, callback){
     getFollowers(current, db, function(err, followers){
       console.log(current + "'s followers: ", followers);
 
-      newq.username = followers;
+      usernames = [];
+      for(var follower in followers){
+        usernames.push({username: follower});
+      }
+
+      newq.username = {$or: usernames};
+      
       console.log("new query: ", newq);
       twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
         if (err) throw err;
