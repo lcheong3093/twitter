@@ -199,27 +199,7 @@ router.post('/search', function(req, res){
   // var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
 
   console.log("req.body ----> username: " + req.body.username + " timestamp: " + req.body.timestamp + " q: " + req.body.q + " limit: " + req.body.limit + " following: " + req.body.following);
-  // for(var opt in defaults){ 
-  //   query[opt] = defaults[opt]; //set up query with defaults
-  // }
-  // console.log("query with defaults: ", query);
-
-  // for(var key in req.body){ 
-  //   if(req.body[key] !== ""){
-  //     if (key === "limit") {
-  //       if (Number.isNaN(req.body.key)) {  //special case (?) for limit to parseInt and error check
-  //         query[key] = 25; // default
-  //       } else {
-  //         query[key] = parseInt(req.body.key);
-  //         if (query[key] > 100) {
-  //           res.send({status: "error", error: "Limit must be maximum of 100"});
-  //         }
-  //       }
-  //     } else {
-  //       query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
-  //     }
-  //   }
-  // } 
+  
   if(req.body.limit > 100){
     res.send({status: "error", error: "Max limit is 100"});
   }else{
@@ -630,11 +610,11 @@ function search(query, limit, following, current, db, callback){
     });
   }
 
-  twitter.collection("items").find(query, options).toArray(function(err, items_found) {
-    if (err) throw err;
-    // console.log("items found: ", items_found);
-    callback(err, items_found);
-  });
+  // twitter.collection("items").find(query, options).toArray(function(err, items_found) {
+  //   if (err) throw err;
+  //   // console.log("items found: ", items_found);
+  //   callback(err, items_found);
+  // });
 }
 
 function getFollowers(username, db, callback){
