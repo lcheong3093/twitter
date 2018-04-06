@@ -595,11 +595,13 @@ function search(query, limit, following, current, db, callback){
 
   // console.log("queery: ". newq);
   var newq = {};
-  for(var que in query){
-    newq[que] = query[que];
-  }
 
   if(following === true){
+    for(var que in query){
+      if(que !== "username");
+      newq[que] = query[que];
+    }
+
     getFollowers(current, db, function(err, followers){
       console.log(current + "'s followers: ", followers);
 
@@ -608,12 +610,12 @@ function search(query, limit, following, current, db, callback){
         console.log("pushing: " + followers[0]);
         usernames.push({username: followers[0]});
       }
-
-      newq.username = {$or: usernames};
+      
+      usernames.push(query.username);
 
       console.log("new query: ", newq);
       console.log("usernames: ", usernames);
-      twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
+      twitter.collection("items").find({$or: usernames}, newq, options).toArray(function(err, items_found) {
         if (err) throw err;
         // console.log("items found: ", items_found);
         callback(err, items_found);
