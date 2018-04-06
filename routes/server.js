@@ -191,34 +191,44 @@ router.get('/item/:id', function(req, res){
 router.post('/search', function(req, res){
   //Gets a list of the latest <limit> number of items prior to (and including) the provided <timestamp>
   var timestamp = new Date().toISOString(); // int: return items from this date and earlier
-  var limit = 25; //int: number of items to return
-  var q = "";  //string: only return items that match (or contain? not sure) the search query (supports spaces)
-  var username = "";  //string: only return items by this username
-  var following = true;  //boolean: if true, only return items made by users that logged in user follows
+  var limit = req.body.limit; //int: number of items to return
+  var q = req.body.q;  //string: only return items that match (or contain? not sure) the search query (supports spaces)
+  var username = req.body.username;  //string: only return items by this username
+  var following = req.body.following;  //boolean: if true, only return items made by users that logged in user follows
   var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
-  var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
+  // var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
 
   console.log("req.body ----> username: " + req.body.username + " timestamp: " + req.body.timestamp + " q: " + req.body.q + " limit: " + req.body.limit + " following: " + req.body.following);
-  for(var opt in defaults){ 
-    query[opt] = defaults[opt]; //set up query with defaults
-  }
-  console.log("query with defaults: ", query);
+  // for(var opt in defaults){ 
+  //   query[opt] = defaults[opt]; //set up query with defaults
+  // }
+  // console.log("query with defaults: ", query);
 
-  for(var key in req.body){ 
-    if(req.body[key] !== "")
-      if (key == "limit") {
-        if (Number.isNaN(req.body.key)) {  //special case (?) for limit to parseInt and error check
-          query[key] = 25; // default
-        } else {
-          query[key] = parseInt(req.body.key);
-          if (query[key] > 100) {
-            res.send({status: "error", error: "Limit must be maximum of 100"});
-          }
-        }
-      } else {
-        query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
+  // for(var key in req.body){ 
+  //   if(req.body[key] !== ""){
+  //     if (key === "limit") {
+  //       if (Number.isNaN(req.body.key)) {  //special case (?) for limit to parseInt and error check
+  //         query[key] = 25; // default
+  //       } else {
+  //         query[key] = parseInt(req.body.key);
+  //         if (query[key] > 100) {
+  //           res.send({status: "error", error: "Limit must be maximum of 100"});
+  //         }
+  //       }
+  //     } else {
+  //       query[key] = req.body[key]; //overwrite any of the optional parameters from the req.body
+  //     }
+  //   }
+  // } 
+  for(var field in req.body){
+    if(req.body[field] !== "" && !Number.isNaN(req.body[field])){ //Add given queries into query
+      if(field === "limit")
+        query[field] = parseInt(req.body.limit);
+      else{
+        query[field] = req.body[field];
+      }
     }
-  } 
+  }
   console.log("search: ", query);
   // searchByTimestamp(timestamp, limit, q, username, following, req.db, function(err, items){
   //   res.send({status: "OK", items: items}); // items is an array of item objects
