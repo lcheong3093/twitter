@@ -596,7 +596,7 @@ function search(query, limit, following, current, db, callback){
 
       console.log("new query: ", newq);
       console.log("usernames: ", usernames);
-      twitter.collection("items").find({$or: usernames}, {content: {$regex: query.q}}, newq, options).toArray(function(err, items_found) {
+      twitter.collection("items").find({$and: [{$or: usernames}, {content: {$regex: query.q}}]}, options).toArray(function(err, items_found) {
         if (err) throw err;
         // console.log("items found: ", items_found);
         callback(err, items_found);
