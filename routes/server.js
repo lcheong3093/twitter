@@ -604,9 +604,9 @@ function search(query, limit, following, current, db, callback){
       console.log(current + "'s followers: ", followers);
 
       usernames = [];
-      for(var follower in followers){
+      for(var i = 0; i < followers.length; i++){
         console.log("pushing: " + followers[0]);
-        usernames.push({username: follower});
+        usernames.push({username: followers[0]});
       }
 
       newq.username = {$or: usernames};
