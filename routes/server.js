@@ -224,7 +224,7 @@ router.post('/search', function(req, res){
     res.send({status: "error", error: "Max limit is 100"});
   }else{
     for(var field in req.body){
-      if(req.body[field] !== "" && field !== "limit" && field !== "timestamp"){ //Add given queries into query
+      if(req.body[field] !== "" && field !== "limit" && field !== "following"){ //Add given queries into query
         if(field === "timestamp"){
           // query[field] = {$lte: field};
         }else{
@@ -243,9 +243,13 @@ router.post('/search', function(req, res){
       limit = 25;
     }
 
+    if(req.body.following !== true && req.body.following !== false){
+      following = true;
+    }
+
     console.log("search: ", query);
     
-    search(query, limit, req.session.username, req.db, function(err, items){
+    search(query, limit, following, req.session.username, req.db, function(err, items){
       res.send({status: "OK", items: items}); // items is an array of item objects
       // res.send({status:"error"});
     });
@@ -576,7 +580,7 @@ function searchByTimestamp(timestamp, limit, db, callback){
   });
 }
 
-function search(query, limit, current, db, callback){
+function search(query, limit, following, current, db, callback){
   var twitter = db.db("twitter");
 
   var options = {"limit":parseInt(limit)};
