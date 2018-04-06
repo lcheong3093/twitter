@@ -600,7 +600,7 @@ function search(query, limit, following, current, db, callback){
   }
 
   if(following === true){
-    getFollowers(username, db, function(err, followers){
+    getFollowers(current, db, function(err, followers){
       console.log(current + "'s followers: ", followers);
 
       newq.username = followers;
