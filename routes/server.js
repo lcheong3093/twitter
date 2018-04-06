@@ -232,7 +232,7 @@ router.post('/search', function(req, res){
         }
       }else{
         if(field === "timestamp"){
-          query[field] = timestamp;
+          query[field] = {$gte: timestamp};
         }else if(field === "following"){
           query[field] = true;
         }
