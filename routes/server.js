@@ -630,6 +630,7 @@ function getFollowers(username, db, callback){
   var twitter = db.db("twitter");
 
   twitter.collection("users").findOne({username: username}, function(err, user){
+    console.log("FOLLOWERS: ", user.followers);
     callback(err, user.followers);
   });
 }
