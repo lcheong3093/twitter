@@ -584,7 +584,7 @@ function search(query, limit, following, current, db, callback){
   var options = {"limit":parseInt(limit)};
   
   // var newq;
-  console.log("SEARCHING....");
+  console.log("Search with " + current + ".....");
   // if(following === true){
   //   newq = {username: {$ne: current}, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
   // }else{
