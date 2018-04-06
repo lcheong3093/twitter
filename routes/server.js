@@ -604,7 +604,7 @@ function search(query, limit, following, current, db, callback){
       console.log(current + "'s followers: ", followers);
 
       newq.username = followers;
-
+      console.log("new query: ", newq);
       twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
         if (err) throw err;
         // console.log("items found: ", items_found);
