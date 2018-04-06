@@ -224,7 +224,7 @@ router.post('/search', function(req, res){
     res.send({status: "error", error: "Max limit is 100"});
   }else{
     for(var field in req.body){
-      if(req.body[field] !== ""){ //Add given queries into query
+      if(req.body[field] !== "" && req.body[field] !== limit){ //Add given queries into query
         if(field === "timestamp"){
           query[field] = {$gte: field};
         }else{
