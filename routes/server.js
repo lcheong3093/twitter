@@ -594,11 +594,43 @@ function search(query, limit, following, current, db, callback){
   // newq = {username: query.username, timestamp: query.timestamp, content: {$regex: query.q}};
 
   // console.log("queery: ". newq);
-  
+  var newq = {};
+  for(var que in query){
+    newq[que] = query[que];
+  }
+
+  if(following === true){
+    getFollowers(username, db, function(err, followers){
+      console.log(current + "'s followers: ", followers);
+
+      newq.username = followers;
+
+      twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
+        if (err) throw err;
+        // console.log("items found: ", items_found);
+        callback(err, items_found);
+      });
+    });
+  }else{ 
+    twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
+      if (err) throw err;
+      // console.log("items found: ", items_found);
+      callback(err, items_found);
+    });
+  }
+
   twitter.collection("items").find(query, options).toArray(function(err, items_found) {
     if (err) throw err;
-    console.log("items found: ", items_found);
+    // console.log("items found: ", items_found);
     callback(err, items_found);
+  });
+}
+
+function getFollowers(username, db, callback){
+  var twitter = db.db("twitter");
+
+  twitter.collection("users").findOne({username: username}, function(err, user){
+    callback(err, user.followers);
   });
 }
 
