@@ -173,18 +173,50 @@ router.post('/additem', function(req, res){
 
 /* Get Item by ID */
 router.get('/item/:id', function(req, res){
-    var id = req.params.id;
-    console.log("GET item by ID-- req.params.id: " + id);
+  var id = req.params.id;
+  console.log("GET item by ID-- req.params.id: " + id);
 
-    getItem(id, req.db, function(err, item){
-      if(item === null){
-        console.log("could not find item");
-        res.send({status: "error"});
-      }else{
-        console.log("item found: ", item);
-        res.send({status: "OK", item: item});
-      }
+  getItem(id, req.db, function(err, item){
+    if(item === null){
+      console.log("could not find item");
+      res.send({status: "error"});
+    }else{
+      console.log("item found: ", item);
+      res.send({status: "OK", item: item});
+    }
+  });
+});
+
+router.get('/item/:id/like', function(req, res){
+  var id = req.params.id;
+  var like = req.body.like;
+
+  //FOR POSTMAN
+  if(like === 'false')
+    like = false;
+  else
+    like = true;
+
+  //FOR GRADER
+  // if(like === false)
+  //   like = false;
+  // else
+  //   like = true;
+  
+  if(like){
+    console.log("like item: " + id);
+    updateItem(id, true, req.db, function(err, response){
+      //DO WE HAVE TO HANDLE ITEMS THAT HAVE ALREADY BEEN LIKED BY CURRENT USER?
+      console.log("updated item likes");
+      res.send({status: response});
     });
+  }else{
+    console.log("unlike item: " + id);
+    updateItem(id, false, req.db, function(err, respond){
+      console.log("could not update item (invalid id?)");
+      res.send({status: respond});
+    });
+  }
 });
       
 // Search for items by timestamp. 
@@ -542,6 +574,23 @@ function deleteItem(id, db, callback){
   twitter.collection("items").deleteOne({index: id}, function(err, res) {
     if (err) throw err;
     callback(err, res);
+  });
+}
+
+function updateItem(id, like, db, callback){
+  var twitter = db.db("twitter");
+  var update = {$inc:{"property.$.likes":1}};
+  if(!like)
+    update = {$dec: {"property.$.likes":1}};
+    
+  twtiter.collection("items").updateOne({index: id}, updates, function(err, result){
+    if(err) throw err;
+    var updated = (result.modifiedCount >0);
+
+    if(updated)
+      callback(err, "OK");
+    else
+      callback(err, "error");
   });
 }
 
