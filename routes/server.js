@@ -267,14 +267,6 @@ router.post('/search', function(req, res){
   
 });
 
-/***
- * 
- * 
- *      > Milestone 2 - new API endpoints
- *      > remember to update /search for milestone 2 requirements
- * 
-***/
-
 // Delete item given an ID
 router.delete('/item/:id', function(req, res){
   // TODO -- make sure that the current user owns the tweet to be deleted
@@ -360,9 +352,66 @@ router.post('/follow', function(req, res){
   });
 });
 
+// Type is multipart/form-data. 
+// content: binary content of file being uploaded
+
+/* replace this with media*/
+/* Add Item */
+router.post('/addmedia', function(req, res){
+  //Post a new item
+  //Only allowed if logged in
+
+  // var username = req.session.username;
+  // if(username === undefined || username === null){
+  //   console.log("no user is logged in");
+  //   res.send({status: "error"});
+  // }else{
+  //   var content = req.body.content;
+  //   var childType = req.body.childType;
+  //   /* 
+  //     error-checking for content/childtype
+  //   */
+  //   console.log("content: " + content + " childType: " + childType);
+  //   /*
+  //     check if logged in using session cookie
+  //   */
+  //   var timestamp = new Date().toISOString();
+  //   var id = rand.generateKey();
+  //   var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
+  //   res.send({status: "OK", id: id});
+
+  //   queue.enqueue(addNewItem, {args: [item, req.db]});
+  // }
+
+  var id = rand.generateKey();
+  res.send({status: "OK", id: id});
+});
+
+// Gets media file by ID
+// Returns media file (image or video)
+
+/* replace getItem with getMedia*/
+router.get('/media/:id', function(req, res){
+  var id = req.params.id;
+  console.log("GET media by ID-- req.params.id: " + id);
+
+  getItem(id, req.db, function(err, item){
+    if(item === null){
+      console.log("could not find item");
+      res.send({status: "error"});
+    }else{
+      console.log("item found: ", item);
+      res.send({status: "OK", item: item});
+    }
+  });
+});
+
 /*** 
  * 
+ * 
+ * 
  * HELPERS
+ * 
  * 
  * 
 ***/
@@ -583,7 +632,7 @@ function updateItem(id, like, db, callback){
   if(!like)
     update = {$dec: {"property.$.likes":1}};
     
-  twtiter.collection("items").updateOne({index: id}, updates, function(err, result){
+  twitter.collection("items").updateOne({index: id}, updates, function(err, result){
     if(err) throw err;
     var updated = (result.modifiedCount >0);
 
@@ -609,10 +658,8 @@ function searchByTimestamp(timestamp, limit, db, callback){
 
 function search(query, limit, following, current, db, callback){
   var twitter = db.db("twitter");
-
   var options = {"limit":parseInt(limit)};
-  
-  // var newq;
+
   console.log("Search with " + current + ".....");
   // if(following === true){
   //   newq = {username: {$ne: current}, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
@@ -675,14 +722,7 @@ function search(query, limit, following, current, db, callback){
         callback(err, items_found);
       });
     }
-    
   }
-
-  // twitter.collection("items").find(query, options).toArray(function(err, items_found) {
-  //   if (err) throw err;
-  //   // console.log("items found: ", items_found);
-  //   callback(err, items_found);
-  // });
 }
 
 function getFollowers(username, db, callback){
