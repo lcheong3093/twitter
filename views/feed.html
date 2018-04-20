@@ -16,15 +16,20 @@
     <div class="container">
       <h1>Twitter</h1>
 
-      <form class="form-group" action="/additem" method="post">
+      <form class="form-group" action="/additem" method="post" enctype="multipart/form-data">
         <h2>Add Item</h2>
 
-        <label for="content" class="sr-only">Username</label>
-        <input type="content" name="content" id="content" class="form-control" placeholder="Tweet" required autofocus>
-        <label for="childType" class="sr-only">Password</label>
-        <input type="childType" name="childType" id="childType" class="form-control" placeholder="childType: empty, 'retweet', or 'reply'">
+        <label for="content" class="sr-only">Tweet</label>
+        <input type="text" name="content" id="content" class="form-control" placeholder="What's happening?" required autofocus>
         
-        <button class="btn btn-lg btn-primary btn-block" type="submit" value="Add Item">Add Item</button>
+        <label for="media" class="sr-only">Media</label>
+        <input type="file" name="media" id="media" class="form-control" placeholder="Add Image">
+      
+        
+        <label for="childType" class="sr-only">ChildType</label>
+        <input type="hidden" name="childType" id="childType" class="form-control" value=null>
+        
+        <button class="btn btn-lg btn-primary btn-block" type="submit" value="Tweet">Tweet</button>
       </form>
 
       <form class="form-group" action="/search" method="post">

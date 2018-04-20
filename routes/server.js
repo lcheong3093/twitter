@@ -63,8 +63,8 @@ router.post('/adduser', function(req, res) {
       addNewUser(user, req.db, function(err, email){
         console.log("key: " + user.status);
         sendVerification(email, user.status);
-        // res.render('verify', {key: key, email: email});
-        res.send({status: "OK"});
+        res.render('verify', {key: key, email: email});
+        // res.send({status: "OK"});
       });
     }
   });
@@ -83,8 +83,8 @@ router.post('/verify', function(req, res) {
       res.send({status: "error"});
     }else{
       verifyUser(email, req.db);
-      // res.render('login');
-      res.send({status: "OK"});
+      res.render('login');
+      // res.send({status: "OK"});
     }
   });
 }); 
@@ -124,9 +124,9 @@ router.post('/login', function(req, res){
         console.log("someone else is logged on...replacing current user");
       }
       req.session.username = username;
-      res.send({status: "OK"});
+      // res.send({status: "OK"});
       //RENDER FEED
-      // res.render('feed');
+      res.render('feed');
     }
   });
 });
