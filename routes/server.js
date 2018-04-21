@@ -180,7 +180,7 @@ router.post('/additem', function(req, res){
     */
     var timestamp = new Date().toISOString();
     var id = rand.generateKey();
-    var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, content: content, childType: childType, parent: parent, media: media, timestamp: timestamp};
+    var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, interest: 0, content: content, childType: childType, parent: parent, media: media, timestamp: timestamp};
 
     if(childType === "retweet"){
       console.log(username + " retweeting " + parent);
@@ -267,80 +267,57 @@ router.post('/search', function(req, res){
 
   // var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
   // var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
+  var query = {};
+  var option = {};
+
   
   if(limit > 100){
     console.log("Maximum limit is 100");
     res.send({status: "error"});
   }else{
-    //Set query parameters & defaults
-    if(limit === undefined || limit === null){
-      limit = 25;
-    }
+    console.log("set values & defaults");
+    //Set query values & defaults
     if(timestamp === undefined || timestamp === null){
-      timestamp = new Date().toISOString();
+      query.timestamp = {$lte: new Date().toISOString()};
     }
-    if(following !== true && following != false){
-      following = true;
+    if(q !== undefined && q !== null){
+      query.content = {$regex: q};
     }
-    if(rank !== "interest" && rank !== "time"){
-      rank = "interest";
+    if(username !== undefined && username !== null){
+      query.username = username;
     }
-    if(replies !== true && replies !== false){
-      replies = true;
+    if(parent !== undefined && parent !== null){
+      query.parent = parent;
     }
-    if(hasMedia !== true && hasMedia !== false){
-      hasMedia = false;
-    }
-
-    var query = {timestamp: timestamp, q: q, username: username, following: following, rank: rank, parent: parent, replies: replies, hasMedia: hasMedia};
     console.log("query: ", query);
 
-    search(query, limit, req.db, function(err, items){
+    //Set option values & defaults
+    if(limit === undefined || limit === null){
+      option.limit = 25;
+    }else if(!Number.isNaN(limit)){
+      option.limit = parseInt(limit);
+    }
+    if(following !== true && following != false){
+      option.following = true;
+    }
+    if(rank !== "interest" && rank !== "time"){
+      option.rank = "interest";
+    }
+    if(replies !== true && replies !== false){
+      option.replies = true;
+    }
+    if(hasMedia !== true && hasMedia !== false){
+      option.hasMedia = false;
+    }
+
+    console.log("option: ", option);
+
+    search(query, option, "abc", req.db, function(err, items){
       console.log("ITEMS FOUND: ", items);
       res.send({status: "OK", items})
     });
 
   }
-  
-  // if(req.body.limit > 100){
-  //   res.send({status: "error", error: "Max limit is 100"});
-  // }else{
-  //   for(var field in req.body){
-  //     if(req.body[field] !== "" && field !== "limit" && field !== "following"){ //Add given queries into query
-  //       if(field === "timestamp"){
-  //         query[field] = {$lte: field};
-  //       }else{
-  //         query[field] = req.body[field];
-  //       }
-  //     }else{
-  //       if(field === "timestamp"){
-  //         query[field] = {$lte: timestamp};
-  //       }
-  //     }
-  //   }
-
-  //   if(Number.isNaN(req.body.limit)){
-  //     limit = 25;
-  //   }
-
-  //   if(following !== true && following !== false){
-  //     following = true;
-  //   }
-
-  //   if(req.body.following === "false")
-  //     following = false;
-
-  //   if(rank !== "time" && rank !== "interest")
-  //     rank = "interest";
-
-  //   console.log("search: ", query);
-    
-  //   search(query, limit, following, rank, req.session.username, req.db, function(err, items){
-  //     res.send({status: "OK", items: items}); // items is an array of item objects
-  //     // res.send({status:"error"});
-  //   });
-  // }
-  
 });
 
 // Delete item given an ID
@@ -704,9 +681,9 @@ function deleteItem(id, db, callback){
 
 function likeItem(id, like, db, callback){
   var twitter = db.db("twitter");
-  var update = {$inc:{"property.likes":1}};
+  var update = {$inc:{"property.likes":1, "interest":1}};
   if(!like)
-    update = {$inc: {"property.likes":-1}};
+    update = {$inc: {"property.likes":-1, "interest":1}};
     
   twitter.collection("items").updateOne({index: id}, update, function(err, result){
     if(err) throw err;
@@ -721,7 +698,7 @@ function likeItem(id, like, db, callback){
 
 function retweetItem(parent, db, callback){
   var twitter = db.db("twitter");
-  var update = {$inc:{"retweeted":1}};
+  var update = {$inc:{"retweeted":1, "interest":1}};
     
   console.log("before update");
   twitter.collection("items").updateOne({index: parent}, update, function(err, result){
@@ -752,25 +729,14 @@ function searchByTimestamp(timestamp, limit, db, callback){
   });
 }
 
-function search(query, limit, db, callback){
-  var sort = {"property.likes" : -1};
-  if(query.rank === "time"){
+function search(query, option, current, db, callback){
+  var sort = {"interest" : -1};
+  if(option.rank === "time"){
     sort = {"timestamp" : -1};
   }
 
-  //Build mongodb find() properties
-  var find = {};
-
-  if(query.q !== undefined && query.q !== null && query.q !== ""){
-    find.content = {$regex: query.q};
-  }
-  if(query.username !== undefined && query.username !== null && query.username !== ""){
-    find.username = query.username;
-  }
-  find.timestamp = {$lte: query.timestamp};
-
-  console.log("FIND: ", find);
-  db.db("twitter").collection("items").find(find, {limit: limit}).sort(sort).toArray(function(err, items){
+  console.log("FIND: ", query);
+  db.db("twitter").collection("items").find(query).limit(option.limit).sort(sort).toArray(function(err, items){
     if(err) throw err;
 
     callback(err, items);
