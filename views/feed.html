@@ -16,29 +16,42 @@
     <div class="container">
       <h1>Twitter</h1>
 
-      <form class="form-group" action="/additem" method="post" enctype="multipart/form-data">
+      <form class="form-group" action="/additem" method="post">
         <h2>Add Item</h2>
 
         <label for="content" class="sr-only">Tweet</label>
-        <input type="text" name="content" id="content" class="form-control" placeholder="What's happening?" required autofocus>
+        <input type="text" name="content" id="content" class="form-control" placeholder="What's happening?">
         
         <label for="media" class="sr-only">Media</label>
-        <input type="file" name="media" id="media" class="form-control" placeholder="Add Image(s)" multiple>
+        <input type="text" name="media" id="media" class="form-control" placeholder="Media IDs" multiple>
         
+        <label for="parent" class="sr-only">ChildType</label>
+        <input type="text" name="parent" id="parent" class="form-control" placeholder="Parent ID">
+
         <label for="childType" class="sr-only">ChildType</label>
-        <input type="hidden" name="childType" id="childType" class="form-control" value=null>
+        <input type="text" name="childType" id="childType" class="form-control" placeholder="childType">
         
         <button class="btn btn-lg btn-primary btn-block" type="submit" value="Tweet">Tweet</button>
       </form>
 
       <form class="form-group" action="/search" method="post">
         <h2>Search</h2>
+        
+        <label for="query" class="sr-only">Query</label>
+        <input type="text" name="query" id="query" class="form-control" placeholder="Search">
 
         <label for="timestamp" class="sr-only">Timestamp</label>
-        <input type="timestamp" name = "timestamp" id="timestamp" class="form-control" placeholder="Timestamp" required>
+        <input type="text" name="timestamp" id="timestamp" class="form-control" placeholder="Timestamp">
+
+        <label for="username" class="sr-only">Username</label>
+        <input type="text" name="username" id="username" class="form-control" placeholder="Username">
+
         <label for="limit" class="sr-only">Number of Items</label>
-        <input type="number" name = "limit" id="limit" class="form-control" placeholder="# items" required>
-        
+        <input type="number" name="limit" id="limit" class="form-control" placeholder="# items">
+
+        <input type="checkbox" name="rank" value="time">Time<br>
+        <input type="checkbox" name="rank" value="interest">Interest<br>
+
         <button class="btn btn-lg btn-primary btn-block" type="submit" value="Search">Search</button>
       </form>
 

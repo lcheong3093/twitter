@@ -13,6 +13,9 @@ router.use(session({
   saveUninitialized: false
 }));
 
+var multer  = require('multer');
+var upload = multer({ dest: 'uploads/' }); 
+
 var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
@@ -149,23 +152,40 @@ router.post('/additem', function(req, res){
   //Post a new item
   //Only allowed if logged in
   var username = req.session.username;
+  console.log("/additem current: " + username);
   if(username === undefined || username === null){
     console.log("no user is logged in");
     res.send({status: "error"});
-  }else{
+  }else{       //There are no media files
     var content = req.body.content;
+    var parent = req.body.parent;
     var childType = req.body.childType;
+
+    if(childType !== "reply" && childType !== "retweet")
+      childType = null;
+
+    var media = req.body.media;
+    media = media.split(", ");
     /* 
       error-checking for content/childtype
     */
-    console.log("content: " + content + " childType: " + childType);
+    console.log("content: " + content + " childType: " + childType + " parent: " + parent);
+    console.log("media IDs: ", media);
     /*
       check if logged in using session cookie
     */
     var timestamp = new Date().toISOString();
     var id = rand.generateKey();
-    var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
-    res.send({status: "OK", id: id});
+    var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, content: content, childType: childType, parent: parent, media: media, timestamp: timestamp};
+
+    if(childType === "retweet"){
+      console.log(username + " retweeting " + parent);
+      retweetItem(parent, req.db, function(err, ret){
+        res.send({status: ret});
+      });
+    }else{
+      res.send({status: "OK", id: id});
+    }
 
     queue.enqueue(addNewItem, {args: [item, req.db]});
   }
@@ -230,6 +250,7 @@ router.post('/search', function(req, res){
   var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
   // var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
 
+  console.log("query: " + req.body.query);
   console.log("req.body ----> username: " + req.body.username + " timestamp: " + req.body.timestamp + " q: " + req.body.q + " limit: " + req.body.limit + " following: " + req.body.following);
   
   if(req.body.limit > 100){
@@ -632,7 +653,7 @@ function updateItem(id, like, db, callback){
   if(!like)
     update = {$dec: {"property.$.likes":1}};
     
-  twitter.collection("items").updateOne({index: id}, updates, function(err, result){
+  twitter.collection("items").updateOne({index: id}, update, function(err, result){
     if(err) throw err;
     var updated = (result.modifiedCount >0);
 
@@ -640,6 +661,26 @@ function updateItem(id, like, db, callback){
       callback(err, "OK");
     else
       callback(err, "error");
+  });
+}
+
+function retweetItem(parent, db, callback){
+  var twitter = db.db("twitter");
+  var update = {$inc:{"retweeted":1}};
+    
+  console.log("before update");
+  twitter.collection("items").updateOne({index: parent}, update, function(err, result){
+    if(err) throw err;
+
+    console.log("after update");
+    var updated = (result.modifiedCount > 0);
+
+    if(updated)
+      callback(err, "OK");
+    else{
+      console.log("didn't modify items");
+      callback(err, "error");
+    }
   });
 }
 
@@ -655,6 +696,8 @@ function searchByTimestamp(timestamp, limit, db, callback){
     callback(err, items_found);
   });
 }
+
+
 
 function search(query, limit, following, current, db, callback){
   var twitter = db.db("twitter");
