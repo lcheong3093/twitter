@@ -215,7 +215,7 @@ router.get('/item/:id', function(req, res){
   });
 });
 
-router.get('/item/:id/like', function(req, res){
+router.post('/item/:id/like', function(req, res){
   var id = req.params.id;
   var like = req.body.like;
 
@@ -233,14 +233,14 @@ router.get('/item/:id/like', function(req, res){
   
   if(like){
     console.log("like item: " + id);
-    updateItem(id, true, req.db, function(err, response){
+    likeItem(id, true, req.db, function(err, response){
       //DO WE HAVE TO HANDLE ITEMS THAT HAVE ALREADY BEEN LIKED BY CURRENT USER?
       console.log("updated item likes");
       res.send({status: response});
     });
   }else{
     console.log("unlike item: " + id);
-    updateItem(id, false, req.db, function(err, respond){
+    likeItem(id, false, req.db, function(err, respond){
       console.log("could not update item (invalid id?)");
       res.send({status: respond});
     });
@@ -655,11 +655,11 @@ function deleteItem(id, db, callback){
   });
 }
 
-function updateItem(id, like, db, callback){
+function likeItem(id, like, db, callback){
   var twitter = db.db("twitter");
-  var update = {$inc:{"property.$.likes":1}};
+  var update = {$inc:{"property.likes":1}};
   if(!like)
-    update = {$dec: {"property.$.likes":1}};
+    update = {$inc: {"property.likes":-1}};
     
   twitter.collection("items").updateOne({index: id}, update, function(err, result){
     if(err) throw err;
