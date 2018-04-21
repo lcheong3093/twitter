@@ -183,11 +183,19 @@ router.post('/additem', function(req, res){
       retweetItem(parent, req.db, function(err, ret){
         res.send({status: ret});
       });
-    }else{
+      queue.enqueue(addNewItem, {args: [item, "items", req.db]});
+    }else if(childType === "reply"){
+      console.log(username + " replying to " + parent);
       res.send({status: "OK", id: id});
+      queue.enqueue(addNewItem, {args: [item, "items", req.db]});
+      queue.enqueue(addNewItem, {args: [item, "replies", req.db]});
+    }else{
+      console.log(username + " tweeting " + id);
+      res.send({status: "OK", id: id});
+      queue.enqueue(addNewItem, {args: [item, "items", req.db]});
     }
 
-    queue.enqueue(addNewItem, {args: [item, req.db]});
+    
   }
 });
 
@@ -478,9 +486,9 @@ function addNewUser(user, db, callback){
 }
 
 //Add item to database
-function addNewItem(item, db){
+function addNewItem(item, collection, db){
   var twitter = db.db("twitter");
-  twitter.collection("items").insert(item, function(err, res) {
+  twitter.collection(collection).insert(item, function(err, res) {
     if (err) throw err;
     console.log("New item added to database: ", res.insertedIds[0]);
     // callback(err, res.insertedIds[0]);
