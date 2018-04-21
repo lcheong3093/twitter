@@ -295,8 +295,9 @@ router.post('/search', function(req, res){
     var query = {timestamp: timestamp, q: q, username: username, following: following, rank: rank, parent: parent, replies: replies, hasMedia: hasMedia};
     console.log("query: ", query);
 
-    search(query, limit, req.db, function(err, result){
-
+    search(query, limit, req.db, function(err, items){
+      console.log("ITEMS FOUND: ", items);
+      res.send({status: "OK", items})
     });
 
   }
@@ -752,7 +753,32 @@ function searchByTimestamp(timestamp, limit, db, callback){
 }
 
 function search(query, limit, db, callback){
-  
+  var sort = {"property.likes" : -1};
+  if(query.rank === "time"){
+    sort = {"timestamp" : -1};
+  }
+
+  //Build mongodb find() properties
+  var find = {};
+
+  if(query.q !== undefined && query.q !== null && query.q !== ""){
+    find.content = {$regex: query.q};
+  }
+  if(query.username !== undefined && query.username !== null && query.username !== ""){
+    find.username = query.username;
+  }
+  find.timestamp = {$lte: query.timestamp};
+
+  console.log("FIND: ", find);
+  db.db("twitter").collection("items").find(find, {limit: limit}).sort(sort).toArray(function(err, items){
+    if(err) throw err;
+
+    callback(err, items);
+  });
+  // if(!following){
+    
+  // }
+
 }
 
 function getFollowers(username, db, callback){
