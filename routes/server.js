@@ -165,7 +165,11 @@ router.post('/additem', function(req, res){
       childType = null;
 
     var media = req.body.media;
+
+    //FOR TESTING (grader will already provide array)
     media = media.split(", ");
+
+    
     /* 
       error-checking for content/childtype
     */
@@ -255,6 +259,7 @@ router.post('/search', function(req, res){
   var q = req.body.q;  //string: only return items that match (or contain? not sure) the search query (supports spaces)
   var username = req.body.username;  //string: only return items by this username
   var following = req.body.following;  //boolean: if true, only return items made by users that logged in user follows
+  var rank = req.body.rank;
   var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
   // var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
 
@@ -282,13 +287,19 @@ router.post('/search', function(req, res){
       limit = 25;
     }
 
-    if(req.body.following !== true && req.body.following !== false){
+    if(following !== true && following !== false){
       following = true;
     }
 
+    if(req.body.following === "false")
+      following = false;
+
+    if(rank !== "time" && rank !== "interest")
+      rank = "interest";
+
     console.log("search: ", query);
     
-    search(query, limit, following, req.session.username, req.db, function(err, items){
+    search(query, limit, following, rank, req.session.username, req.db, function(err, items){
       res.send({status: "OK", items: items}); // items is an array of item objects
       // res.send({status:"error"});
     });
@@ -707,10 +718,13 @@ function searchByTimestamp(timestamp, limit, db, callback){
 
 
 
-function search(query, limit, following, current, db, callback){
+function search(query, limit, following, rank, current, db, callback){
   var twitter = db.db("twitter");
   var options = {"limit":parseInt(limit)};
 
+  var sort = "'property.likes'";
+  if(rank === "time")
+    sort = "'timestamp'";
   console.log("Search with " + current + ".....");
   // if(following === true){
   //   newq = {username: {$ne: current}, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
@@ -751,7 +765,7 @@ function search(query, limit, following, current, db, callback){
           callback(err, items_found);
         });
       }else{
-        twitter.collection("items").find({$or: usernames}, newq, options).toArray(function(err, items_found) {
+        twitter.collection("items").find({$or: usernames}, newq, options).sort({sort: -1}).toArray(function(err, items_found) {
           if (err) throw err;
           // console.log("items found: ", items_found);
           callback(err, items_found);
@@ -760,8 +774,14 @@ function search(query, limit, following, current, db, callback){
       
     });
   }else{ 
+    for(var que in query){
+      if(que !== "username" && que !== "q")
+        newq[que] = query[que];
+    }
+
     if(query.q !== undefined){
-      twitter.collection("items").find({content: {$regex: query.q}}, newq, options).toArray(function(err, items_found) {
+      console.log("HERE");
+      twitter.collection("items").find({content: {$regex: query.q}}, newq, options).sort({"property.likes": -1}).toArray(function(err, items_found) {
         if (err) throw err;
         // console.log("items found: ", items_found);
         callback(err, items_found);
@@ -780,8 +800,14 @@ function getFollowers(username, db, callback){
   var twitter = db.db("twitter");
 
   twitter.collection("users").findOne({username: username}, function(err, user){
-    console.log("FOLLOWERS: ", user.followers);
-    callback(err, user.followers);
+    
+    if(users === null){
+      console.log("user not logged in");
+      callback(err, null);
+    }else{
+      console.log("FOLLOWERS: ", user.followers);
+      callback(err, user.followers);
+    }
   });
 }
 
