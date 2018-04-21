@@ -253,57 +253,92 @@ router.post('/item/:id/like', function(req, res){
       
 // Search for items by timestamp. 
 router.post('/search', function(req, res){
-  //Gets a list of the latest <limit> number of items prior to (and including) the provided <timestamp>
-  var timestamp = new Date().toISOString(); // int: return items from this date and earlier
+  var status = "OK";
+  //Grab all fields
+  var timestamp = req.body.timestamp; // int: return items from this date and earlier
   var limit = req.body.limit; //int: number of items to return
   var q = req.body.q;  //string: only return items that match (or contain? not sure) the search query (supports spaces)
   var username = req.body.username;  //string: only return items by this username
   var following = req.body.following;  //boolean: if true, only return items made by users that logged in user follows
   var rank = req.body.rank;
-  var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
+  var parent = req.body.parent;
+  var replies = req.body.replies;
+  var hasMedia = req.body.hasMedia;
+
+  // var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
   // var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
-
-  console.log("query: " + req.body.query);
-  console.log("req.body ----> username: " + req.body.username + " timestamp: " + req.body.timestamp + " q: " + req.body.q + " limit: " + req.body.limit + " following: " + req.body.following);
   
-  if(req.body.limit > 100){
-    res.send({status: "error", error: "Max limit is 100"});
+  if(limit > 100){
+    console.log("Maximum limit is 100");
+    res.send({status: "error"});
   }else{
-    for(var field in req.body){
-      if(req.body[field] !== "" && field !== "limit" && field !== "following"){ //Add given queries into query
-        if(field === "timestamp"){
-          query[field] = {$lte: field};
-        }else{
-          query[field] = req.body[field];
-        }
-      }else{
-        if(field === "timestamp"){
-          query[field] = {$lte: timestamp};
-        }
-      }
-    }
-
-    if(Number.isNaN(req.body.limit)){
+    //Set query parameters & defaults
+    if(limit === undefined || limit === null){
       limit = 25;
     }
-
-    if(following !== true && following !== false){
+    if(timestamp === undefined || timestamp === null){
+      timestamp = new Date().toISOString();
+    }
+    if(following !== true && following != false){
       following = true;
     }
-
-    if(req.body.following === "false")
-      following = false;
-
-    if(rank !== "time" && rank !== "interest")
+    if(rank !== "interest" && rank !== "time"){
       rank = "interest";
+    }
+    if(replies !== true && replies !== false){
+      replies = true;
+    }
+    if(hasMedia !== true && hasMedia !== false){
+      hasMedia = false;
+    }
 
-    console.log("search: ", query);
-    
-    search(query, limit, following, rank, req.session.username, req.db, function(err, items){
-      res.send({status: "OK", items: items}); // items is an array of item objects
-      // res.send({status:"error"});
+    var query = {timestamp: timestamp, q: q, username: username, following: following, rank: rank, parent: parent, replies: replies, hasMedia: hasMedia};
+    console.log("query: ", query);
+
+    search(query, limit, req.db, function(err, result){
+
     });
+
   }
+  
+  // if(req.body.limit > 100){
+  //   res.send({status: "error", error: "Max limit is 100"});
+  // }else{
+  //   for(var field in req.body){
+  //     if(req.body[field] !== "" && field !== "limit" && field !== "following"){ //Add given queries into query
+  //       if(field === "timestamp"){
+  //         query[field] = {$lte: field};
+  //       }else{
+  //         query[field] = req.body[field];
+  //       }
+  //     }else{
+  //       if(field === "timestamp"){
+  //         query[field] = {$lte: timestamp};
+  //       }
+  //     }
+  //   }
+
+  //   if(Number.isNaN(req.body.limit)){
+  //     limit = 25;
+  //   }
+
+  //   if(following !== true && following !== false){
+  //     following = true;
+  //   }
+
+  //   if(req.body.following === "false")
+  //     following = false;
+
+  //   if(rank !== "time" && rank !== "interest")
+  //     rank = "interest";
+
+  //   console.log("search: ", query);
+    
+  //   search(query, limit, following, rank, req.session.username, req.db, function(err, items){
+  //     res.send({status: "OK", items: items}); // items is an array of item objects
+  //     // res.send({status:"error"});
+  //   });
+  // }
   
 });
 
@@ -716,84 +751,8 @@ function searchByTimestamp(timestamp, limit, db, callback){
   });
 }
 
-
-
-function search(query, limit, following, rank, current, db, callback){
-  var twitter = db.db("twitter");
-  var options = {"limit":parseInt(limit)};
-
-  var sort = "'property.likes'";
-  if(rank === "time")
-    sort = "'timestamp'";
-  console.log("Search with " + current + ".....");
-  // if(following === true){
-  //   newq = {username: {$ne: current}, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
-  // }else{
-  //   newq = {username: query.username, content: {$regex : query.q}, timestamp: {$gte:query.timestamp}};
-  // }
-
-  // newq = {username: query.username, timestamp: query.timestamp, content: {$regex: query.q}};
-
-  // console.log("queery: ". newq);
-  var newq = {};
-
-  if(following === true){
-    for(var que in query){
-      if(que !== "username" && que !== "q")
-        newq[que] = query[que];
-    }
-
-    getFollowers(current, db, function(err, followers){
-      console.log(current + "'s followers: ", followers);
-
-      usernames = [];
-      for(var i = 0; i < followers.length; i++){
-        console.log("pushing: " + followers[0]);
-        usernames.push({username: followers[0]});
-      }
-      
-      if(query.username !== undefined)
-        usernames.push({username: query.username});
-
-      console.log("new query: ", newq);
-      console.log("usernames: ", usernames);
-
-      if(query.q !== undefined){
-        twitter.collection("items").find({$and: [{$or: usernames}, {content: {$regex: query.q}}]}, options).toArray(function(err, items_found) {
-          if (err) throw err;
-          // console.log("items found: ", items_found);
-          callback(err, items_found);
-        });
-      }else{
-        twitter.collection("items").find({$or: usernames}, newq, options).sort({sort: -1}).toArray(function(err, items_found) {
-          if (err) throw err;
-          // console.log("items found: ", items_found);
-          callback(err, items_found);
-        });
-      }
-      
-    });
-  }else{ 
-    for(var que in query){
-      if(que !== "username" && que !== "q")
-        newq[que] = query[que];
-    }
-
-    if(query.q !== undefined){
-      console.log("HERE");
-      twitter.collection("items").find({content: {$regex: query.q}}, newq, options).sort({"property.likes": -1}).toArray(function(err, items_found) {
-        if (err) throw err;
-        // console.log("items found: ", items_found);
-        callback(err, items_found);
-      });
-    }else{
-      twitter.collection("items").find(newq, options).toArray(function(err, items_found) {
-        if (err) throw err;
-        // console.log("items found: ", items_found);
-        callback(err, items_found);
-      });
-    }
-  }
+function search(query, limit, db, callback){
+  
 }
 
 function getFollowers(username, db, callback){
