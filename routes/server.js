@@ -273,6 +273,9 @@ router.post('/search', function(req, res){
   var query = {};
   var option = {};
 
+  console.log("ORIGINAL: ");
+  console.log("timestamp: " + timestamp + " limit: " + limit + " q: " + q + " username: " + username);
+  console.log("following: " + following + " rank: " + rank + " parent: " + parent  + " replies: " + replies + " hasMedia: " + hasMedia);
   if(limit > 100){
     console.log("Maximum limit is 100");
     res.send({status: "error"});
@@ -324,7 +327,7 @@ router.post('/search', function(req, res){
     console.log("option: ", option);
 
     search(query, option, "efg", req.db, function(err, items){
-      console.log("ITEMS FOUND: ", items);
+      // console.log("ITEMS FOUND: ", items);
       res.send({status: "OK", items})
     });
 
