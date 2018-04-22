@@ -3,7 +3,6 @@ var router = express.Router();
 var mongo = require('mongodb');
 var mongoClient = mongo.MongoClient;
 var url = "mongodb://localhost";
-
 var nodemailer = require('nodemailer');
 var rand = require('generate-key');
 var session = require('express-session');
@@ -12,21 +11,22 @@ router.use(session({
   resave: false,
   saveUninitialized: false
 }));
-
 var multer  = require('multer');
 var upload = multer({ dest: 'uploads/' }); 
-
 var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
 
-var count = 0;
+//media table:
+// - id (int, primary key)
+// - itemid (int)
+// - content (blob)
 
-// const cassandra = require('cassandra-driver');
-// const cassclient = new cassandra.Client({ contactPoints: ['host1'], keyspace: 'twitter' });
-// cassclient.connect(function (err) {
-//   assert.ifError(err);
-// });
+const cassandra = require('cassandra-driver');
+const cassclient = new cassandra.Client({ contactPoints: ['host1'], keyspace: 'twitter'});
+cassclient.connect(function (err) {
+  assert.ifError(err);
+});
 
 
 /* GET home page. */
@@ -84,9 +84,7 @@ router.post('/adduser', function(req, res) {
 router.post('/verify', function(req, res) {
   var email = req.body.email;
   var user_key = req.body.key;
-
   console.log("email: " + email + " key: " + user_key);
-
   checkKey(email, user_key, req.db, function(err, string){
     if(string !== undefined){
       console.log(string);
@@ -176,7 +174,6 @@ router.post('/additem', function(req, res){
     //FOR TESTING (grader will already provide array)
     media = media.split(", ");
 
-    
     /* 
       error-checking for content/childtype
     */
@@ -205,8 +202,6 @@ router.post('/additem', function(req, res){
       res.send({status: "OK", id: id});
       queue.enqueue(addNewItem, {args: [item, "items", req.db]});
     }
-
-    
   }
 });
 
@@ -271,13 +266,9 @@ router.post('/search', function(req, res){
   var parent = req.body.parent;
   var replies = req.body.replies;
   var hasMedia = req.body.hasMedia;
-
-  // var query = {}; // https:// stackoverflow. com/questions/45307491/mongoose-complex-queries-with-optional-parameters
-  // var defaults = {timestamp: timestamp, limit: limit, q: q, username: username, following: following};
   var query = {};
   var option = {};
 
-  
   if(limit > 100){
     console.log("Maximum limit is 100");
     res.send({status: "error"});
@@ -323,7 +314,6 @@ router.post('/search', function(req, res){
     if(hasMedia !== true && hasMedia !== false){
       option.hasMedia = false;
     }
-
     console.log("option: ", option);
 
     search(query, option, "efg", req.db, function(err, items){
@@ -349,7 +339,6 @@ router.delete('/item/:id', function(req, res){
       res.sendStatus(200);
     }
   });
-  //res.status(200).send();
 });
 
 // Gets user profile information
@@ -406,7 +395,6 @@ router.post('/follow', function(req, res){
   var current = req.session.username;  //User currently logged in
   var username = req.body.username;   //Username to follow
   var follow = req.body.follow;       //true = follow; false = unfollow
-
   console.log("follow: " + follow);
   console.log("user " + current + " follow: " + follow + " " + username);
   
@@ -421,34 +409,17 @@ router.post('/follow', function(req, res){
 
 // Type is multipart/form-data. 
 // content: binary content of file being uploaded
-
-/* replace this with media*/
-/* Add Item */
 router.post('/addmedia', function(req, res){
-  //Post a new item
-  //Only allowed if logged in
-
-  // var username = req.session.username;
-  // if(username === undefined || username === null){
-  //   console.log("no user is logged in");
-  //   res.send({status: "error"});
-  // }else{
-  //   var content = req.body.content;
-  //   var childType = req.body.childType;
-  //   /* 
-  //     error-checking for content/childtype
-  //   */
-  //   console.log("content: " + content + " childType: " + childType);
-  //   /*
-  //     check if logged in using session cookie
-  //   */
-  //   var timestamp = new Date().toISOString();
-  //   var id = rand.generateKey();
-  //   var item = {index: id, username: username, property: {likes: 0}, retweeted: 0, content: content, timestamp: timestamp};
-  //   res.send({status: "OK", id: id});
-
-  //   queue.enqueue(addNewItem, {args: [item, req.db]});
-  // }
+  var username = req.session.username;
+  if(username === undefined || username === null){
+    console.log("no user is logged in");
+    res.send({status: "error"});
+  }else{
+    var content = req.body.content;
+    var id = rand.generateKey();
+    res.send({status: "OK", id: id});
+    queue.enqueue(addNewMedia, {args: [id, null, content]});
+  }
 
   var id = rand.generateKey();
   res.send({status: "OK", id: id});
@@ -525,11 +496,34 @@ function addNewUser(user, db, callback){
 
 //Add item to database
 function addNewItem(item, collection, db){
+<<<<<<< HEAD
   var twitter = db.db("twitter");
   twitter.collection(collection).insert(item, function(err, res) {
     if (err) throw err;
     console.log("New item added to database: ", res.insertedIds[0]);
   });
+=======
+    var twitter = db.db("twitter");
+    twitter.collection(collection).insert(item, function(err, res) {
+      if (err) throw err;
+      console.log("New item added to database: ", res.insertedIds[0]);
+      // callback(err, res.insertedIds[0]);
+    });
+}
+
+//Add media to cassandra db
+function addNewMedia(id, itemid, content){
+    const query = 'INSERT INTO media (id, itemid, content) VALUES (?, ?, ?)';
+    var id = "'"+id+"'";
+    var itemid = "'"+itemid+"'";
+    var content = "'"+content+"'";
+    const params = [id, itemid, content];
+    client.execute(query, params, { prepare: true }, function (err) {
+        assert.ifError(err);
+        //Inserted in the cluster
+        console.log("media inserted into cassandra cluster");
+    });
+>>>>>>> cecee1679f89d4aed0b8c58ffd4bf388cb50da24
 }
 
 //Send verification email w/ key
