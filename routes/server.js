@@ -17,6 +17,11 @@ var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
 
+//media table:
+// - id (int, primary key)
+// - itemid (int)
+// - content (blob)
+
 const cassandra = require('cassandra-driver');
 const cassclient = new cassandra.Client({ contactPoints: ['host1'], keyspace: 'twitter'});
 cassclient.connect(function (err) {
