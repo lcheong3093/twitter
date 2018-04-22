@@ -321,7 +321,10 @@ router.post('/search', function(req, res){
       option.rank = "interest";
     }
     if(hasMedia !== true && hasMedia !== false){
-      option.hasMedia = false;
+      if(hasMedia === "true")
+        option.hasMedia = true;
+      else
+        option.hasMedia = false;
     }
     console.log("option: ", option);
 
@@ -760,6 +763,9 @@ function search(query, option, current, db, callback){
   var sort = {"interest" : -1};
   if(option.rank === "time"){
     sort = {"timestamp" : -1};
+  }
+  if(option.hasMedia){
+    query.media = {$ne: []};
   }
 
   if(option.following){
