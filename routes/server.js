@@ -762,7 +762,7 @@ function search(query, option, current, db, callback){
   if(option.following){
     getFollowing(current, db, function(err, followers){
       console.log(current + "'s followers", followers);
-      if(followers.length !== 0 || followers === null)
+      if(followers === null)
         query.username = {$in: followers};
 
       console.log("FIND: ", query);
