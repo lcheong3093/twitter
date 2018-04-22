@@ -25,7 +25,7 @@ queue.start();
 const cassandra = require('cassandra-driver');
 const cassclient = new cassandra.Client({ contactPoints: ['host1'], keyspace: 'twitter'});
 cassclient.connect(function (err) {
-  assert.ifError(err);
+  if(err) throw err;
 });
 
 
