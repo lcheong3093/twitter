@@ -201,11 +201,6 @@ router.post('/additem', function(req, res){
         res.send({status: ret});
       });
       queue.enqueue(addNewItem, {args: [item, "items", req.db]});
-    }else if(childType === "reply"){
-      console.log(username + " replying to " + parent);
-      res.send({status: "OK", id: id});
-      queue.enqueue(addNewItem, {args: [item, "items", req.db]});
-      queue.enqueue(addNewItem, {args: [item, "replies", req.db]});
     }else{
       console.log(username + " tweeting " + id);
       res.send({status: "OK", id: id});
