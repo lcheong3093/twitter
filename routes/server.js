@@ -25,7 +25,8 @@ queue.start();
 const cassandra = require('cassandra-driver');
 const cassclient = new cassandra.Client({ contactPoints: ['localhost'], keyspace: 'twitter'});
 cassclient.connect(function (err) {
-  if(err) throw err;
+  if (err) throw err;
+  console.log("connected");
 });
 
 
@@ -510,8 +511,8 @@ function addNewMedia(id, itemid, content){
 
   console.log("query: ", query);
   console.log("params: ", params);
-  client.execute(query, params, { prepare: true }, function (err) {
-      assert.ifError(err);
+  cassclient.execute(query, params, { prepare: true }, function (err) {
+      if (err) throw err;
       //Inserted in the cluster
       console.log("media inserted into cassandra cluster");
   });
