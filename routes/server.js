@@ -411,33 +411,34 @@ router.post('/follow', function(req, res){
 // Type is multipart/form-data. 
 // content: binary content of file being uploaded
 router.post('/addmedia', function(req, res){
-  var username = req.session.username;
-  if(username === undefined || username === null){
-    console.log("no user is logged in");
-    res.send({status: "error"});
-  }else{
+  // var username = req.session.username;
+  // console.log("addmedia username: ", username);
+  // if(username === undefined || username === null){
+  //   console.log("no user is logged in");
+  //   res.send({status: "error"});
+  // }else{
     var content = req.body.content;
     var id = rand.generateKey();
+    console.log("addmedia1");
     res.send({status: "OK", id: id});
     queue.enqueue(addNewMedia, {args: [id, null, content]});
-  }
+    console.log("addmedia2");
+  // }
 });
 
 // Gets media file by ID
 // Returns media file (image or video)
-
-/* replace getItem with getMedia*/
 router.get('/media/:id', function(req, res){
   var id = req.params.id;
   console.log("GET media by ID-- req.params.id: " + id);
 
-  getItem(id, req.db, function(err, item){
-    if(item === null){
-      console.log("could not find item");
+  getMedia(id, req.db, function(err, media){
+    if(media === null){
+      console.log("could not find media");
       res.send({status: "error"});
     }else{
-      console.log("item found: ", item);
-      res.send({status: "OK", item: item});
+      console.log("media found: ", media);
+      res.send({status: "OK", media: media});
     }
   });
 });
@@ -668,6 +669,14 @@ function getItem(id, db, callback){
     callback(err, res);
   });
 }
+
+// function getMedia(id, db, callback){
+//   var twitter = db.db("twitter");
+//   twitter.collection("items").findOne({index: id}, function(err, res) {
+//     if (err) throw err;
+//     callback(err, res);
+//   });
+// }
 
 //Delete item by ID
 function deleteItem(id, db, callback){
