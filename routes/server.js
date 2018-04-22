@@ -430,7 +430,7 @@ router.post('/addmedia', upload.single('content'), function(req, res){
     console.log("no user is logged in");
     res.send({status: "error"});
   }else{
-    var content = new Buffer(req.file.buffer, 'binary');
+    var content = new Buffer(req.file.buffer, 'binary').toString('base64');
     console.log("content: ", content);
     var id = rand.generateKey();
     res.send({status: "OK", id: id});
@@ -521,7 +521,7 @@ function addNewItem(item, collection, db){
 
 function addNewMedia(id, content){
   console.log("INSERT MEDIA");
-  const query = 'INSERT INTO media (id, content) VALUES (?, ?, ?)';
+  const query = 'INSERT INTO media (id, content) VALUES (?, ?)';
   // var blob = new Blob(content);
   // console.log("blob: ", blob);
   const params = [id, content];
