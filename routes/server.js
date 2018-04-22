@@ -180,8 +180,8 @@ router.post('/additem', function(req, res){
 
     var media = req.body.media;
 
-    //FOR TESTING (grader will already provide array)
-    media = media.split(", ");
+    // //FOR TESTING (grader will already provide array)
+    // media = media.split(", ");
 
     /* 
       error-checking for content/childtype
@@ -424,7 +424,7 @@ router.post('/follow', function(req, res){
 router.post('/addmedia', upload.single('content'), function(req, res){
   // var username = req.session.username;
   // console.log("addmedia username: ", username);
-  var username = "abc";
+  var username = req.session.username;
 
   if(username === undefined || username === null){
     console.log("no user is logged in");
@@ -692,13 +692,9 @@ function getItem(id, db, callback){
   });
 }
 
-// function getMedia(id, db, callback){
-//   var twitter = db.db("twitter");
-//   twitter.collection("items").findOne({index: id}, function(err, res) {
-//     if (err) throw err;
-//     callback(err, res);
-//   });
-// }
+function getMedia(id, db, callback){
+  
+}
 
 //Delete item by ID
 function deleteItem(id, db, callback){
