@@ -496,13 +496,6 @@ function addNewUser(user, db, callback){
 
 //Add item to database
 function addNewItem(item, collection, db){
-<<<<<<< HEAD
-  var twitter = db.db("twitter");
-  twitter.collection(collection).insert(item, function(err, res) {
-    if (err) throw err;
-    console.log("New item added to database: ", res.insertedIds[0]);
-  });
-=======
     var twitter = db.db("twitter");
     twitter.collection(collection).insert(item, function(err, res) {
       if (err) throw err;
@@ -523,7 +516,6 @@ function addNewMedia(id, itemid, content){
         //Inserted in the cluster
         console.log("media inserted into cassandra cluster");
     });
->>>>>>> cecee1679f89d4aed0b8c58ffd4bf388cb50da24
 }
 
 //Send verification email w/ key
