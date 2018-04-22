@@ -259,7 +259,7 @@ router.post('/item/:id/like', function(req, res){
       
 // Search for items by timestamp. 
 router.post('/search', function(req, res){
-  var status = "OK";
+  console.log("current user: " + req.session.username);
   //Grab all fields
   var timestamp = req.body.timestamp; // int: return items from this date and earlier
   var limit = req.body.limit; //int: number of items to return
