@@ -326,7 +326,7 @@ router.post('/search', function(req, res){
     }
     console.log("option: ", option);
 
-    search(query, option, "efg", req.db, function(err, items){
+    search(query, option, req.session.username, req.db, function(err, items){
       // console.log("ITEMS FOUND: ", items);
       res.send({status: "OK", items})
     });
