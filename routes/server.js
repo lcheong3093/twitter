@@ -504,6 +504,7 @@ function addNewItem(item, collection, db){
 }
 
 function addNewMedia(id, itemid, content){
+<<<<<<< HEAD
   const query = 'INSERT INTO media (id, itemid, content) VALUES (?, ?, ?)';
   var id = "'"+id+"'";
   var itemid = "'"+itemid+"'";
@@ -514,6 +515,18 @@ function addNewMedia(id, itemid, content){
       //Inserted in the cluster
       console.log("media inserted into cassandra cluster");
   });
+=======
+    const query = 'INSERT INTO media (id, itemid, content) VALUES (?, ?, ?)';
+    var id = "'"+id+"'";
+    var itemid = "'"+itemid+"'";
+    var content = "'"+content+"'";
+    const params = [id, itemid, content];
+    client.execute(query, params, { prepare: true }, function (err) {
+        assert.ifError(err);
+        //Inserted in the cluster
+        console.log("media inserted into cassandra cluster");
+    });
+>>>>>>> 80e061efc8e62cecda50e0c62a67cda159756d01
 }
 
 //Send verification email w/ key
