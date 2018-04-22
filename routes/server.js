@@ -496,34 +496,24 @@ function addNewUser(user, db, callback){
 
 //Add item to database
 function addNewItem(item, collection, db){
-<<<<<<< HEAD
-  var twitter = db.db("twitter");
-  twitter.collection(collection).insert(item, function(err, res) {
-    if (err) throw err;
-    console.log("New item added to database: ", res.insertedIds[0]);
-  });
-=======
     var twitter = db.db("twitter");
     twitter.collection(collection).insert(item, function(err, res) {
       if (err) throw err;
       console.log("New item added to database: ", res.insertedIds[0]);
-      // callback(err, res.insertedIds[0]);
     });
 }
 
-//Add media to cassandra db
 function addNewMedia(id, itemid, content){
-    const query = 'INSERT INTO media (id, itemid, content) VALUES (?, ?, ?)';
-    var id = "'"+id+"'";
-    var itemid = "'"+itemid+"'";
-    var content = "'"+content+"'";
-    const params = [id, itemid, content];
-    client.execute(query, params, { prepare: true }, function (err) {
-        assert.ifError(err);
-        //Inserted in the cluster
-        console.log("media inserted into cassandra cluster");
-    });
->>>>>>> cecee1679f89d4aed0b8c58ffd4bf388cb50da24
+  const query = 'INSERT INTO media (id, itemid, content) VALUES (?, ?, ?)';
+  var id = "'"+id+"'";
+  var itemid = "'"+itemid+"'";
+  var content = "'"+content+"'";
+  const params = [id, itemid, content];
+  client.execute(query, params, { prepare: true }, function (err) {
+      assert.ifError(err);
+      //Inserted in the cluster
+      console.log("media inserted into cassandra cluster");
+  });
 }
 
 //Send verification email w/ key
