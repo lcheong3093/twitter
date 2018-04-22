@@ -23,7 +23,7 @@ queue.start();
 // - content (blob)
 
 const cassandra = require('cassandra-driver');
-const cassclient = new cassandra.Client({ contactPoints: ['host1'], keyspace: 'twitter'});
+const cassclient = new cassandra.Client({ contactPoints: ['localhost'], keyspace: 'twitter'});
 cassclient.connect(function (err) {
   if(err) throw err;
 });
