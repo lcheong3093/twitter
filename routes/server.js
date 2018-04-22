@@ -295,6 +295,13 @@ router.post('/search', function(req, res){
     }
     if(parent !== undefined && parent !== null){
       query.parent = parent;
+      query.childType = "reply";
+    }
+    if(replies === false || replies === "false"){
+      if(query.parent === undefined)
+        query.childType = {$ne: "reply"};
+      else
+        query.childType = "";
     }
     console.log("query: ", query);
 
@@ -305,13 +312,13 @@ router.post('/search', function(req, res){
       option.limit = parseInt(limit);
     }
     if(following !== true && following != false){
-      option.following = true;
+      if(following === "false")
+        option.following = false;
+      else
+        option.following = true;
     }
     if(rank !== "interest" && rank !== "time"){
       option.rank = "interest";
-    }
-    if(replies !== true && replies !== false){
-      option.replies = true;
     }
     if(hasMedia !== true && hasMedia !== false){
       option.hasMedia = false;
@@ -319,7 +326,7 @@ router.post('/search', function(req, res){
 
     console.log("option: ", option);
 
-    search(query, option, "abc", req.db, function(err, items){
+    search(query, option, "efg", req.db, function(err, items){
       console.log("ITEMS FOUND: ", items);
       res.send({status: "OK", items})
     });
@@ -522,7 +529,6 @@ function addNewItem(item, collection, db){
   twitter.collection(collection).insert(item, function(err, res) {
     if (err) throw err;
     console.log("New item added to database: ", res.insertedIds[0]);
-    // callback(err, res.insertedIds[0]);
   });
 }
 
@@ -742,29 +748,46 @@ function search(query, option, current, db, callback){
     sort = {"timestamp" : -1};
   }
 
-  console.log("FIND: ", query);
-  db.db("twitter").collection("items").find(query).limit(option.limit).sort(sort).toArray(function(err, items){
-    if(err) throw err;
+  if(option.following){
+    getFollowing(current, db, function(err, followers){
+      console.log(current + "'s followers", followers);
+      query.username = {$in: followers};
 
-    callback(err, items);
-  });
+      console.log("FIND: ", query);
+
+      db.db("twitter").collection("items").find(query).limit(option.limit).sort(sort).toArray(function(err, items){
+        if(err) throw err;
+        callback(err, items);
+      });
+    });
+  }else{ 
+    console.log("FIND: ", query);
+
+    db.db("twitter").collection("items").find(query).limit(option.limit).sort(sort).toArray(function(err, items){
+      if(err) throw err;
+      callback(err, items);
+    });
+  }
+
+  
+  
   // if(!following){
     
   // }
 
 }
 
-function getFollowers(username, db, callback){
+function getFollowing(username, db, callback){
   var twitter = db.db("twitter");
 
   twitter.collection("users").findOne({username: username}, function(err, user){
     
-    if(users === null){
+    if(user === null){
       console.log("user not logged in");
       callback(err, null);
     }else{
-      console.log("FOLLOWERS: ", user.followers);
-      callback(err, user.followers);
+      console.log("FOLLOWERS: ", user.following);
+      callback(err, user.following);
     }
   });
 }
