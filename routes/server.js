@@ -284,6 +284,8 @@ router.post('/search', function(req, res){
     //Set query values & defaults
     if(timestamp === undefined || timestamp === null){
       query.timestamp = {$lte: new Date().toISOString()};
+    }else{
+      query.timestamp = {$lte: timestamp};
     }
     if(q !== undefined && q !== null){
       query.content = {$regex: q};
@@ -301,6 +303,7 @@ router.post('/search', function(req, res){
       else
         query.childType = "";
     }
+    
     console.log("query: ", query);
 
     //Set option values & defaults
@@ -308,21 +311,29 @@ router.post('/search', function(req, res){
       option.limit = 25;
     }else if(!Number.isNaN(limit)){
       option.limit = parseInt(limit);
+    }else{
+      option.limit = limit;
     }
     if(following !== true && following != false){
       if(following === "false")
         option.following = false;
       else
         option.following = true;
+    }else{
+      option.following = following;
     }
     if(rank !== "interest" && rank !== "time"){
       option.rank = "interest";
+    }else{
+      option.rank = rank;
     }
     if(hasMedia !== true && hasMedia !== false){
       if(hasMedia === "true")
         option.hasMedia = true;
       else
         option.hasMedia = false;
+    }else{
+      option.hasMedia = hasMedia;
     }
     console.log("option: ", option);
 
