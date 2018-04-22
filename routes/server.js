@@ -519,16 +519,20 @@ function addNewItem(item, collection, db){
 function addNewMedia(id, content){
   console.log("INSERT MEDIA");
   const query = 'INSERT INTO media (id, content) VALUES (?, ?, ?)';
-  var blob = new Blob(content);
-  console.log("blob: ", blob);
-  const params = [id, blob];
+  // var blob = new Blob(content);
+  // console.log("blob: ", blob);
+  const params = [id, content];
 
   console.log("query: ", query);
   console.log("params: ", params);
-  cassclient.execute(query, params, { prepare: true }, function (err) {
-      if (err) throw err;
+  cassclient.execute(query, params, function (err) {
+    if (err){
+      console.log("could not insert media");
+      res.send({status: "error"});
+    }else{
       //Inserted in the cluster
       console.log("media inserted into cassandra cluster");
+    }
   });
   
 }
