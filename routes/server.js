@@ -11,8 +11,16 @@ router.use(session({
   resave: false,
   saveUninitialized: false
 }));
+
 var multer  = require('multer');
-var upload = multer({ dest: 'uploads/' }); 
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+var Blob = require('blob');
+// var base64Img = require('base64-img');
+
+// var parseFormdata = require('parse-formdata')
+
+
 var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
@@ -410,21 +418,26 @@ router.post('/follow', function(req, res){
 
 // Type is multipart/form-data. 
 // content: binary content of file being uploaded
-router.post('/addmedia', function(req, res){
+router.post('/addmedia', upload.single('content'), function(req, res){
   // var username = req.session.username;
   // console.log("addmedia username: ", username);
-  // if(username === undefined || username === null){
-  //   console.log("no user is logged in");
-  //   res.send({status: "error"});
-  // }else{
-    var content = req.body.content;
+  var username = "abc";
+
+  if(username === undefined || username === null){
+    console.log("no user is logged in");
+    res.send({status: "error"});
+  }else{
+    var content = new Buffer(req.file.buffer, 'binary');
     console.log("content: ", content);
     var id = rand.generateKey();
-    console.log("addmedia1");
     res.send({status: "OK", id: id});
-    queue.enqueue(addNewMedia, {args: [id, null, content]});
-    console.log("addmedia2");
-  // }
+    queue.enqueue(addNewMedia, {args: [id, content]});
+  }
+  
+
+
+
+  // res.send('asdf');
 });
 
 // Gets media file by ID
@@ -503,13 +516,12 @@ function addNewItem(item, collection, db){
   });
 }
 
-function addNewMedia(id, itemid, content){
+function addNewMedia(id, content){
   console.log("INSERT MEDIA");
-  const query = 'INSERT INTO media (id, itemid, content) VALUES (?, ?, ?)';
-  var id = "'"+id+"'";
-  var itemid = "'"+itemid+"'";
-  var content = "'"+content+"'";
-  const params = [id, itemid, content];
+  const query = 'INSERT INTO media (id, content) VALUES (?, ?, ?)';
+  var blob = new Blob(content);
+  console.log("blob: ", blob);
+  const params = [id, blob];
 
   console.log("query: ", query);
   console.log("params: ", params);
@@ -518,6 +530,7 @@ function addNewMedia(id, itemid, content){
       //Inserted in the cluster
       console.log("media inserted into cassandra cluster");
   });
+  
 }
 
 //Send verification email w/ key
