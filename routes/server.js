@@ -420,9 +420,6 @@ router.post('/addmedia', function(req, res){
     res.send({status: "OK", id: id});
     queue.enqueue(addNewMedia, {args: [id, null, content]});
   }
-
-  var id = rand.generateKey();
-  res.send({status: "OK", id: id});
 });
 
 // Gets media file by ID
