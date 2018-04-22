@@ -418,6 +418,7 @@ router.post('/addmedia', function(req, res){
   //   res.send({status: "error"});
   // }else{
     var content = req.body.content;
+    console.log("content: ", content);
     var id = rand.generateKey();
     console.log("addmedia1");
     res.send({status: "OK", id: id});
