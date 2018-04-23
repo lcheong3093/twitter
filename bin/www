@@ -2,8 +2,8 @@
 
 /**
  * Module dependencies.
- */
-
+*/
+console.log("MASTER - bin/www");
 var app = require('../app');
 var debug = require('debug')('twitter:server');
 var http = require('http');

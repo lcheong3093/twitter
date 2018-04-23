@@ -1,3 +1,5 @@
+
+console.log("MASTER - app.js");
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -16,6 +18,7 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 
 // uncomment after placing your favicon in /public
+console.log("Router.use() problem");
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -25,8 +28,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(expressMongoDb('mongodb://localhost'));
 
 app.use('/', server);
+console.log("Router.use() problem");
 app.use('/users', users);
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
@@ -45,4 +48,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+// app.listen(8080);
 module.exports = app;
+
