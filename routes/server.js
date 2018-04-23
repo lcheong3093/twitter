@@ -18,17 +18,15 @@ const upload = multer({ storage });
 var Blob = require('blob');
 // var base64Img = require('base64-img');
 
-// var parseFormdata = require('parse-formdata')
-
-
 var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
+// var kue = require('kue');
+// var queue = kue.createQueue();
 
-//media table:
-// - id (int, primary key)
-// - itemid (int)
-// - content (blob)
+var cluster = require('cluster');
+var numCPUs = require('os').cpus().length;
+console.log("#cpus: " + numCPUs);
 
 const cassandra = require('cassandra-driver');
 const cassclient = new cassandra.Client({ contactPoints: ['localhost'], keyspace: 'twitter'});
@@ -303,7 +301,7 @@ router.post('/search', function(req, res){
       else
         query.childType = "";
     }
-    
+
     console.log("query: ", query);
 
     //Set option values & defaults
