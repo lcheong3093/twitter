@@ -545,16 +545,15 @@ function addNewMedia(media, collection, db){
 function sendVerification(email, key){
   var message = "validation key: <" + key + ">";
   const transport = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: 'localhost',
     port: 465,
     secure: true,
     auth: {
-      user: 'cloudcse356twitter@gmail.com',
-      pass: '2COMESafter1'
+      user: 'ubuntu',
+      pass: ''
     }
   });
   var mailOpts = {
-        from: 'user@gmail.com',
         to: email,
         subject: 'Verify your account',
         text: message
