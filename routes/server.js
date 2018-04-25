@@ -441,7 +441,7 @@ router.post('/addmedia', upload.single('content'), function(req, res){
   } else {
     console.log("can't read content: ", req.file);
     var content = new Buffer(req.file.buffer, 'binary').toString('base64');
-    console.log("content: ", content);
+    // console.log("content: ", content);
     var id = rand.generateKey();
     var media = {index: id, content: content};
     res.send({status: "OK", id: id});
