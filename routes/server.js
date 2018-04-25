@@ -546,7 +546,6 @@ function sendVerification(email, key){
   var message = "validation key: <" + key + ">";
   const transport = nodemailer.createTransport({
     host: 'localhost',
-    port: 465,
     secure: true,
     auth: {
       user: 'ubuntu',
@@ -560,7 +559,7 @@ function sendVerification(email, key){
   };
   transport.sendMail(mailOpts, (err, info) => {
     if (err) console.log(err); //Handle Error
-    console.log("email sent");
+    else console.log("email sent");
   });
 }
 
