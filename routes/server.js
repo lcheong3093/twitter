@@ -24,6 +24,7 @@ queue.start();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+  console.log("HOME");
   res.render('welcome');
 
 });
