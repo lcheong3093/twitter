@@ -400,18 +400,24 @@ router.get('/user/:username/following', function(req, res){
 // Follow or unfollow a user
 router.post('/follow', function(req, res){
   var current = req.session.username;  //User currently logged in
-  var username = req.body.username;   //Username to follow
-  var follow = req.body.follow;       //true = follow; false = unfollow
-  console.log("follow: " + follow);
-  console.log("user " + current + " follow: " + follow + " " + username);
+
+  if(current === undefined || current === null){
+    res.send({status: "error"});
+  }else{
+    var username = req.body.username;   //Username to follow
+    var follow = req.body.follow;       //true = follow; false = unfollow
+    console.log("follow: " + follow);
+    console.log("user " + current + " follow: " + follow + " " + username);
+    
+    followUser(username, current, follow, function(err, ret){
+      if(ret === false){
+        res.send({status: "error"});
+      }else{
+        res.send({status: "OK"});
+      }
+    });
+  }
   
-  followUser(username, current, follow, function(err, ret){
-    if(ret === false){
-      res.send({status: "error"});
-    }else{
-      res.send({status: "OK"});
-    }
-  });
 });
 
 // Type is multipart/form-data. 
