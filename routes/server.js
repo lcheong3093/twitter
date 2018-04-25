@@ -399,23 +399,35 @@ router.get('/user/:username/following', function(req, res){
 
 // Follow or unfollow a user
 router.post('/follow', function(req, res){
-  var current = req.session.username;  //User currently logged in
+  // var current = req.session.username;  //User currently logged in
 
+  // if(current === undefined || current === null){
+  //   res.send({status: "error"});
+  // }else{
+  //   var username = req.body.username;   //Username to follow
+  //   var follow = req.body.follow;       //true = follow; false = unfollow
+  //   console.log("follow: " + follow);
+  //   console.log("user " + current + " follow: " + follow + " " + username);
+    
+  //   followUser(username, current, follow, function(err, ret){
+  //     if(ret === false){
+  //       res.send({status: "error"});
+  //     }else{
+  //       res.send({status: "OK"});
+  //     }
+  //   });
+  // }
+
+  var current = req.session.username;
   if(current === undefined || current === null){
+    console.log("no user currently logged in");
     res.send({status: "error"});
   }else{
-    var username = req.body.username;   //Username to follow
-    var follow = req.body.follow;       //true = follow; false = unfollow
-    console.log("follow: " + follow);
-    console.log("user " + current + " follow: " + follow + " " + username);
-    
-    followUser(username, current, follow, function(err, ret){
-      if(ret === false){
-        res.send({status: "error"});
-      }else{
-        res.send({status: "OK"});
-      }
-    });
+    var follow = req.body.follow;
+    var username = req.body.username; 
+
+    console.log(current + " follow (" + follow + ") " + username);
+    followUser()
   }
   
 });
@@ -423,9 +435,9 @@ router.post('/follow', function(req, res){
 // Type is multipart/form-data. 
 // content: binary content of file being uploaded
 router.post('/addmedia', upload.single('content'), function(req, res){
-  // var username = req.session.username;
+  var username = req.session.username;
   console.log("/addmedia");
-  var username = "abc";
+
   if(username === undefined || username === null){
     console.log("no user is logged in");
     res.send({status: "error"});
@@ -578,58 +590,104 @@ function verifyUser(email, db){
 }
 
 //Update user's followers; either follow or unfollow (toggle boolean) the requested username
-function followUser(username, current, follow, callback){
-  mongoClient.connect(url, function(err, db) {
-    if (err) throw err;
-    //Can we assume that the current user is always a valid user? (from session)
-    if(follow){
-    console.log(current + " trying to follow " + username);
-      var follower = {$addToSet: {followers: current}};
-      db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
-        if (err) throw err;
-        if(ret.matchedCount <= 0){
-          console.log("Cannot find the user you're trying to follow");
-          callback(err, false);
-        }else{
-          console.log("updated " + username + "'s followers");
-          var following = {$addToSet: {following: username}};
-          db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
-            if (err) throw err;
-            if(ret.matchedCount <= 0){
-              console.log("??");
-              callback(err, false);
-            }else{
-              console.log("updated following/follower lists of both users")
-              callback(err, true);
-            }
-          });
-        }
-      });
-    }else{
-      console.log(current + " trying to unfollow " + username);
-      var follower = {$pull: {followers: current}};
-      db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
-        if (err) throw err;
-        if(ret.matchedCount <= 0){
-          console.log("Cannot find the user you're trying to unfollow");
-          callback(err, false);
-        }else{
-          console.log("updated " + username + "'s followers");
-          var following = {$pull: {following: username}};
-          db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
-            if (err) throw err;
-            if(ret.matchedCount <= 0){
-              console.log("??");
-              callback(err, false);
-            }else{
-              console.log("updated following/follower lists of both users")
-              callback(err, true);
-            }
-          });
-        }
-      });
-    }
-  });
+function followUser(username, current, follow, db, callback){
+  if(follow){
+    var follower = {$addToSet: {followers: current}};
+    db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
+      if (err) throw err;
+      if(ret.matchedCount <= 0){
+        console.log("Cannot find the user you're trying to follow");
+        callback(err, false);
+      }else{
+        console.log("updated " + username + "'s followers");
+        var following = {$addToSet: {following: username}};
+        db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
+          if (err) throw err;
+          if(ret.matchedCount <= 0){
+            console.log("??");
+            callback(err, false);
+          }else{
+            console.log("updated following/follower lists of both users")
+            callback(err, true);
+          }
+        });
+      }
+    });
+  }else{
+    console.log(current + " trying to unfollow " + username);
+    var follower = {$pull: {followers: current}};
+    db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
+      if (err) throw err;
+      if(ret.matchedCount <= 0){
+        console.log("Cannot find the user you're trying to unfollow");
+        callback(err, false);
+      }else{
+        console.log("updated " + username + "'s followers");
+        var following = {$pull: {following: username}};
+        db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
+          if (err) throw err;
+          if(ret.matchedCount <= 0){
+            console.log("??");
+            callback(err, false);
+          }else{
+            console.log("updated following/follower lists of both users")
+            callback(err, true);
+          }
+        });
+      }
+    });
+  }
+  // mongoClient.connect(url, function(err, db) {
+  //   if (err) throw err;
+  //   //Can we assume that the current user is always a valid user? (from session)
+  //   if(follow){
+  //   console.log(current + " trying to follow " + username);
+  //     var follower = {$addToSet: {followers: current}};
+  //     db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
+  //       if (err) throw err;
+  //       if(ret.matchedCount <= 0){
+  //         console.log("Cannot find the user you're trying to follow");
+  //         callback(err, false);
+  //       }else{
+  //         console.log("updated " + username + "'s followers");
+  //         var following = {$addToSet: {following: username}};
+  //         db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
+  //           if (err) throw err;
+  //           if(ret.matchedCount <= 0){
+  //             console.log("??");
+  //             callback(err, false);
+  //           }else{
+  //             console.log("updated following/follower lists of both users")
+  //             callback(err, true);
+  //           }
+  //         });
+  //       }
+  //     });
+  //   }else{
+  //     console.log(current + " trying to unfollow " + username);
+  //     var follower = {$pull: {followers: current}};
+  //     db.db("twitter").collection("users").updateOne({username: username}, follower, function(err, ret){
+  //       if (err) throw err;
+  //       if(ret.matchedCount <= 0){
+  //         console.log("Cannot find the user you're trying to unfollow");
+  //         callback(err, false);
+  //       }else{
+  //         console.log("updated " + username + "'s followers");
+  //         var following = {$pull: {following: username}};
+  //         db.db("twitter").collection("users").updateOne({username: current}, following, function(err, ret){
+  //           if (err) throw err;
+  //           if(ret.matchedCount <= 0){
+  //             console.log("??");
+  //             callback(err, false);
+  //           }else{
+  //             console.log("updated following/follower lists of both users")
+  //             callback(err, true);
+  //           }
+  //         });
+  //       }
+  //     });
+  //   }
+  // });
 }
 
 //Check username & password & verification
