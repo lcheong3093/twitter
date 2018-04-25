@@ -1,4 +1,3 @@
-console.log("hello");
 var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb');
@@ -23,7 +22,6 @@ var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
 
-console.log("setup");
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('welcome');
@@ -418,11 +416,14 @@ router.post('/follow', function(req, res){
 // Type is multipart/form-data. 
 // content: binary content of file being uploaded
 router.post('/addmedia', upload.single('content'), function(req, res){
-  var username = req.session.username;
+  // var username = req.session.username;
+  console.log("/addmedia");
+  var username = "abc";
   if(username === undefined || username === null){
     console.log("no user is logged in");
     res.send({status: "error"});
   } else {
+    console.log("can't read content: ", req.file);
     var content = new Buffer(req.file.buffer, 'binary').toString('base64');
     console.log("content: ", content);
     var id = rand.generateKey();
