@@ -671,7 +671,12 @@ function getItem(id, db, callback){
 }
 
 function getMedia(id, db, callback){
-  
+  var twitter = db.db("twitter");
+  twitter.collection("media").findOne({index: id}, function(err, res) {
+    if (err) throw err;
+    callback(err, res);
+  });
+
 }
 
 //Delete item by ID
