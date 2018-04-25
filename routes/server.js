@@ -14,7 +14,7 @@ var store = new MongoDBStore({
   databaseName: 'twitter',
   collection: 'session'
 });
-router.use(rquire('express-session')({
+router.use(require('express-session')({
   secret: 'foo',
   cookie: {
     maxAge: 1000*60*60*24 //one day
