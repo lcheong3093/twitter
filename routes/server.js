@@ -547,10 +547,6 @@ function sendVerification(email, key){
   const transport = nodemailer.createTransport({
     host: 'localhost',
     secure: true,
-    auth: {
-      user: 'ubuntu',
-      pass: ''
-    }
   });
   var mailOpts = {
         to: email,
