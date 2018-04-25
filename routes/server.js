@@ -21,7 +21,7 @@ router.use(require('express-session')({
   },
   store: store,
   resave: true,
-  saveUninitiazlized: true
+  saveUninitialized: true
 }));
 
 var multer  = require('multer');
