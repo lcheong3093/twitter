@@ -549,8 +549,8 @@ function sendVerification(email, key){
     port: 465,
     secure: true,
     auth: {
-      user: 'clismurf@gmail.com',
-      pass: 'osuwarii23'
+      user: 'twitterclonecse356@gmail.com',
+      pass: '2COMESafter1'
     }
   });
   var mailOpts = {
