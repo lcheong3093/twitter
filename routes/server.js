@@ -5,11 +5,23 @@ var mongoClient = mongo.MongoClient;
 var url = "mongodb://192.168.1.29";
 var nodemailer = require('nodemailer');
 var rand = require('generate-key');
+
+//Storing Sessions
 var session = require('express-session');
-router.use(session({
-  secret: 'foo',  
-  resave: false,
-  saveUninitialized: false
+var MongoDBStore = require('connect-mongodb-session')(session);
+var store = new MongoDBStore({
+  uri: 'mongodb://192.168.1.29',
+  databaseName: 'twitter',
+  collection: 'session'
+});
+router.use(rquire('express-session')({
+  secret: 'foo',
+  cookie: {
+    maxAge: 1000*60*60*24 //one day
+  },
+  store: store,
+  resave: true,
+  saveUninitiazlized: true
 }));
 
 var multer  = require('multer');
@@ -126,6 +138,7 @@ router.post('/login', function(req, res){
       }else{
         console.log("someone else is logged on...replacing current user");
       }
+
       req.session.username = username;
       res.send({status: "OK"});
       //RENDER FEED
@@ -136,15 +149,7 @@ router.post('/login', function(req, res){
 
 /* Log out of Account */
 router.post('/logout', function(req, res){
-  console.log("current user " + req.session.username);
-  //if user is not logged in, return status: "error"
-  if(req.session.username === null){
-    console.log("No current users");
-    res.send({status: "error"});
-  }else{
-    req.session.username = null;
-    res.send({status: "OK"});
-  }
+  
 });
 
 /* Add Item */
@@ -399,24 +404,6 @@ router.get('/user/:username/following', function(req, res){
 
 // Follow or unfollow a user
 router.post('/follow', function(req, res){
-  // var current = req.session.username;  //User currently logged in
-
-  // if(current === undefined || current === null){
-  //   res.send({status: "error"});
-  // }else{
-  //   var username = req.body.username;   //Username to follow
-  //   var follow = req.body.follow;       //true = follow; false = unfollow
-  //   console.log("follow: " + follow);
-  //   console.log("user " + current + " follow: " + follow + " " + username);
-    
-  //   followUser(username, current, follow, function(err, ret){
-  //     if(ret === false){
-  //       res.send({status: "error"});
-  //     }else{
-  //       res.send({status: "OK"});
-  //     }
-  //   });
-  // }
 
   var current = req.session.username;
   if(current === undefined || current === null){
@@ -426,8 +413,18 @@ router.post('/follow', function(req, res){
     var follow = req.body.follow;
     var username = req.body.username; 
 
+    if(follow !== true && follow !== false)
+      follow = true;
+      
     console.log(current + " follow (" + follow + ") " + username);
-    followUser()
+    followUser(username, current, follow, req.db, function(err, result){
+      if(!result){
+        res.send({status: "error"});
+        console.log("could not process follow request");
+      }else{
+        res.send({status: "OK"});
+      }
+    });
   }
   
 });
@@ -478,7 +475,14 @@ router.get('/media/:id', function(req, res){
  * 
  * 
 ***/
-
+function getCurrent(db, callback){
+  var twitter = db.db("twitter");
+  twitter.collection("users").findOne({}, function(err, res) {
+    if (err) throw err;
+    console.log("current user: " + res.username);
+    callback(err, res.username);
+  });
+} 
 //Get user object with username
 function getUser(username, db, callback){
   var twitter = db.db("twitter");
