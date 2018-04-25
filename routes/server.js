@@ -549,7 +549,7 @@ function sendVerification(email, key){
     port: 465,
     secure: true,
     auth: {
-      user: 'twitterclonecse356@gmail.com',
+      user: 'tttcse356@gmail.com',
       pass: '2COMESafter1'
     }
   });
