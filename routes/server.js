@@ -1,3 +1,4 @@
+console.log("hello");
 var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb');
@@ -22,6 +23,7 @@ var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
 
+console.log("setup");
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('welcome');
