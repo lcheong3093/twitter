@@ -460,7 +460,7 @@ router.get('/media/:id', function(req, res){
       console.log("could not find media");
       res.send({status: "error"});
     }else{
-      console.log("media found: ", media);
+      console.log("media found");
       res.send({status: "OK", media: media});
     }
   });
