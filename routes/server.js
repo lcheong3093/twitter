@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb');
 var mongoClient = mongo.MongoClient;
-var url = "mongodb://192.168.1.29";
+var url = "mongodb://192.168.1.20";
 var nodemailer = require('nodemailer');
 var rand = require('generate-key');
 
@@ -10,7 +10,7 @@ var rand = require('generate-key');
 var session = require('express-session');
 var MongoDBStore = require('connect-mongodb-session')(session);
 var store = new MongoDBStore({
-  uri: 'mongodb://192.168.1.29',
+  uri: 'mongodb://192.168.1.20',
   databaseName: 'twitter',
   collection: 'session'
 });
