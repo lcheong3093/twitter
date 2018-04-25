@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var mongo = require('mongodb');
-var mongoClient = mongo.MongoClient;
-var url = "mongodb://localhost";
+// var mongo = require('mongodb');
+// var mongoClient = mongo.MongoClient;
+// var url = "mongodb://localhost";
 var nodemailer = require('nodemailer');
 var rand = require('generate-key');
 var session = require('express-session');
