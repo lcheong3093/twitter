@@ -418,25 +418,18 @@ router.post('/follow', function(req, res){
 // Type is multipart/form-data. 
 // content: binary content of file being uploaded
 router.post('/addmedia', upload.single('content'), function(req, res){
-  // var username = req.session.username;
-  // console.log("addmedia username: ", username);
   var username = req.session.username;
-
   if(username === undefined || username === null){
     console.log("no user is logged in");
     res.send({status: "error"});
-  }else{
+  } else {
     var content = new Buffer(req.file.buffer, 'binary').toString('base64');
     console.log("content: ", content);
     var id = rand.generateKey();
+    var media = {index: id, content: content};
     res.send({status: "OK", id: id});
-    queue.enqueue(addNewMedia, {args: [id, content]});
+    queue.enqueue(addNewItem, {args: [media, "media", req.db]});
   }
-  
-
-
-
-  // res.send('asdf');
 });
 
 // Gets media file by ID
@@ -515,26 +508,13 @@ function addNewItem(item, collection, db){
   });
 }
 
-function addNewMedia(id, content){
-  // console.log("INSERT MEDIA");
-  // const query = 'INSERT INTO media (id, content) VALUES (?, ?)';
-  // // var blob = new Blob(content);
-  // // console.log("blob: ", blob);
-  // const params = [id, content];
-
-  // console.log("query: ", query);
-  // console.log("params: ", params);
-  // cassclient.execute(query, params, function (err) {
-  //   if (err){
-  //     console.log("could not insert media");
-  //     throw err;
-      
-  //   }else{
-  //     //Inserted in the cluster
-  //     console.log("media inserted into cassandra cluster");
-  //   }
-  // });
-  
+function addNewMedia(media, collection, db){
+  console.log("addNewMedia");
+  var twitter = db.db("twitter");
+  twitter.collection(collection).insert(media, function(err, res) {
+    if (err) throw err;
+    console.log("New media added to database: ", res.insertedIds[0]);
+  });
 }
 
 //Send verification email w/ key
