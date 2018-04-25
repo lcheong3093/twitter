@@ -21,16 +21,6 @@ var Blob = require('blob');
 var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
-// var kue = require('kue');
-// var queue = kue.createQueue();
-
-const cassandra = require('cassandra-driver');
-const cassclient = new cassandra.Client({ contactPoints: ['192.168.1.23', '130.245.169.173'], keyspace: 'twitter'});
-cassclient.connect(function (err) {
-  if (err) throw err;
-  console.log("cassandra connected");
-});
-
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -524,24 +514,24 @@ function addNewItem(item, collection, db){
 }
 
 function addNewMedia(id, content){
-  console.log("INSERT MEDIA");
-  const query = 'INSERT INTO media (id, content) VALUES (?, ?)';
-  // var blob = new Blob(content);
-  // console.log("blob: ", blob);
-  const params = [id, content];
+  // console.log("INSERT MEDIA");
+  // const query = 'INSERT INTO media (id, content) VALUES (?, ?)';
+  // // var blob = new Blob(content);
+  // // console.log("blob: ", blob);
+  // const params = [id, content];
 
-  console.log("query: ", query);
-  console.log("params: ", params);
-  cassclient.execute(query, params, function (err) {
-    if (err){
-      console.log("could not insert media");
-      throw err;
+  // console.log("query: ", query);
+  // console.log("params: ", params);
+  // cassclient.execute(query, params, function (err) {
+  //   if (err){
+  //     console.log("could not insert media");
+  //     throw err;
       
-    }else{
-      //Inserted in the cluster
-      console.log("media inserted into cassandra cluster");
-    }
-  });
+  //   }else{
+  //     //Inserted in the cluster
+  //     console.log("media inserted into cassandra cluster");
+  //   }
+  // });
   
 }
 
