@@ -546,13 +546,13 @@ function sendVerification(email, key){
   var message = "validation key: <" + key + ">";
   const transport = nodemailer.createTransport({
     host: 'localhost',
-    secure: true,
-    auth: {
-      user: 'ubuntu'
+    port: 25,
+    secure: false,
+    tls: {
+       rejectUnauthorized: false
     }
   });
   var mailOpts = {
-    from: '',
     to: email,
     subject: 'Verify your account',
     text: message

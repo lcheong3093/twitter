@@ -11,6 +11,7 @@
     "blob": "0.0.4",
     "body-parser": "~1.18.2",
     "cassandra-driver": "^3.5.0",
+    "connect-mongodb-session": "^2.0.2",
     "cookie-parser": "~1.4.3",
     "cookie-session": "^2.0.0-beta.3",
     "debug": "~2.6.9",
