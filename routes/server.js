@@ -547,11 +547,15 @@ function sendVerification(email, key){
   const transport = nodemailer.createTransport({
     host: 'localhost',
     secure: true,
+    auth: {
+      user: 'ubuntu'
+    }
   });
   var mailOpts = {
-        to: email,
-        subject: 'Verify your account',
-        text: message
+    from: '',
+    to: email,
+    subject: 'Verify your account',
+    text: message
   };
   transport.sendMail(mailOpts, (err, info) => {
     if (err) console.log(err); //Handle Error
