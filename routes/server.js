@@ -37,7 +37,7 @@ queue.start();
 /* adding back cassandra */
 const cassandra = require('cassandra-driver');
 const cassclient = new cassandra.Client({ contactPoints: ['localhost'], keyspace: 'twitter'});
-// const cassclient = new cassandra.Client({ contactPoints: ['192.168.1.23', '130.245.169.173'], keyspace: 'twitter'});
+// const cassclient = new cassandra.Client({ contactPoints: ['192.168.1.23', '192.168.1.24', '192.168.1.25', '192.168.1.26'], keyspace: 'twitter'});
 cassclient.connect(function (err) {
   if (err) throw err;
   console.log("cassandra connected");
