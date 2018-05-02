@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(expressMongoDb('mongodb://192.168.1.20'));
+app.use(expressMongoDb('mongodb://192.168.1.23'));
 
 app.use('/', server);
 app.use('/users', users);
