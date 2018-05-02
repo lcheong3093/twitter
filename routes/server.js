@@ -34,6 +34,16 @@ var tq = require('task-queue');
 var queue = tq.Queue({capacity: 1000, concurrency: 100});
 queue.start();
 
+/* adding back cassandra */
+const cassandra = require('cassandra-driver');
+const cassclient = new cassandra.Client({ contactPoints: ['localhost'], keyspace: 'twitter'});
+// const cassclient = new cassandra.Client({ contactPoints: ['192.168.1.23', '130.245.169.173'], keyspace: 'twitter'});
+cassclient.connect(function (err) {
+  if (err) throw err;
+  console.log("cassandra connected");
+});
+
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   console.log("HOME");
@@ -532,13 +542,36 @@ function addNewItem(item, collection, db){
   });
 }
 
-function addNewMedia(media, collection, db){
-  console.log("addNewMedia");
-  var twitter = db.db("twitter");
-  twitter.collection(collection).insert(media, function(err, res) {
-    if (err) throw err;
-    console.log("New media added to database: ", res.insertedIds[0]);
-  });
+/* OLD [ADDNEWMEDIA], WORKS FOR MONGODB */
+// function addNewMedia(media, collection, db){
+//   console.log("addNewMedia");
+//   var twitter = db.db("twitter");
+//   twitter.collection(collection).insert(media, function(err, res) {
+//     if (err) throw err;
+//     console.log("New media added to database: ", res.insertedIds[0]);
+//   });
+// }
+
+/* adding cassandra back */
+function addNewMedia(id, content){
+  console.log("INSERT MEDIA");
+  const query = 'INSERT INTO media (id, content) VALUES (?, ?)';
+  // var blob = new Blob(content);
+  // console.log("blob: ", blob);
+  const params = [id, content];
+
+  console.log("query: ", query);
+  console.log("params: ", params);
+  cassclient.execute(query, params, function (err) {
+    if (err){
+      console.log("could not insert media");
+      throw err;
+      
+    }else{
+      //Inserted in the cluster
+      console.log("media inserted into cassandra cluster");
+    }
+  }); 
 }
 
 //Send verification email w/ key
